@@ -1,0 +1,88 @@
+{
+  "app": {
+    "name": "FitFix",
+    "tagline": "Garmin .FIT toolkit ve tvém prohlížeči"
+  },
+  "nav": {
+    "github": "GitHub",
+    "language": "Jazyk"
+  },
+  "home": {
+    "headline": "Slučování & čištění Garmin .FIT souborů",
+    "subhead": "Slep rozpadlou aktivitu zpátky dohromady. Odstraň GPS motanice z míst, kde ses zastavil. Vše v prohlížeči — soubory neopustí tvoje zařízení.",
+    "drop": "Sem přetáhni jeden nebo víc .fit souborů",
+    "or": "nebo",
+    "browse": "Vyber soubory",
+    "merge_cta": "Sloučit soubory",
+    "clean_cta": "Najít GPS motanice",
+    "two_files_hint": "Přidej 2 soubory ke sloučení. Přidej 1 soubor pro čištění GPS motanic."
+  },
+  "security": {
+    "local": {
+      "title": "100% lokální",
+      "body": "Tvoje .FIT soubory se zpracují přímo v prohlížeči. Nic se nikam neuploaduje."
+    },
+    "offline": {
+      "title": "Funguje offline",
+      "body": "Nainstaluj jako PWA. Používej v terénu bez internetu."
+    },
+    "open": {
+      "title": "Open source",
+      "body": "MIT licence, kód na GitHubu. Můžeš si to prohlédnout, forknout, hostovat sám."
+    },
+    "free": {
+      "title": "Bez účtů, bez reklam",
+      "body": "Žádný login. Žádný tracking. Žádná analytika. Zdarma napořád."
+    }
+  },
+  "merge": {
+    "title": "Slučování {{n}} souborů",
+    "running": "Slučuji…",
+    "success": "Hotovo. Sloučená aktivita je připravená.",
+    "summary": {
+      "distance": "Vzdálenost",
+      "timer": "Čistý čas",
+      "elapsed": "Celkový čas",
+      "laps": "Lapy",
+      "records": "Body"
+    },
+    "download": "Stáhnout merged.fit",
+    "back": "Začít znovu"
+  },
+  "clean": {
+    "title": "Detekce GPS motanic",
+    "scanning": "Skenuji…",
+    "found": "Nalezeno {{n}} motanic",
+    "instruct": "Zaškrtni motanice, které chceš zploštit. Každá se nahradí jedním bodem v centroidu; časy a data ze senzorů zůstanou zachované.",
+    "selected_summary": "Vybráno: {{n}} z {{total}} · odebere {{km}} km falešné vzdálenosti · {{dur}} stání",
+    "options": {
+      "title": "Nastavení detekce",
+      "radius": "Poloměr (m)",
+      "minDuration": "Min. trvání (s)",
+      "minPoints": "Min. bodů",
+      "rescan": "Znovu skenovat"
+    },
+    "cluster": {
+      "duration": "trvání",
+      "points": "bodů",
+      "excursion": "max odchylka",
+      "path": "nachozeno",
+      "centroid": "centroid"
+    },
+    "select_all": "Vybrat vše",
+    "select_none": "Zrušit výběr",
+    "apply": "Vyčistit & stáhnout",
+    "back": "Začít znovu"
+  },
+  "errors": {
+    "not_fit": "{{name}} nevypadá jako platný .FIT soubor.",
+    "merge_needs_two": "Slučování vyžaduje přesně 2 .fit soubory.",
+    "clean_needs_one": "Čištění vyžaduje přesně 1 .fit soubor."
+  },
+  "footer": {
+    "made_with": "Vyrobeno",
+    "by": "od",
+    "source": "Zdrojový kód",
+    "issues": "Nahlásit chybu"
+  }
+}

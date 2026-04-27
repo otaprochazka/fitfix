@@ -1,0 +1,88 @@
+{
+  "app": {
+    "name": "FitFix",
+    "tagline": "Garmin .FIT toolkit, in your browser"
+  },
+  "nav": {
+    "github": "GitHub",
+    "language": "Language"
+  },
+  "home": {
+    "headline": "Merge & clean Garmin .FIT activity files",
+    "subhead": "Stitch a split activity back together. Remove GPS jitter from break spots. All in your browser — your files never leave your device.",
+    "drop": "Drop one or more .fit files here",
+    "or": "or",
+    "browse": "Browse files",
+    "merge_cta": "Merge files",
+    "clean_cta": "Find GPS jitter",
+    "two_files_hint": "Add 2 files to merge them. Add 1 file to clean GPS jitter."
+  },
+  "security": {
+    "local": {
+      "title": "100% local",
+      "body": "Your .FIT files are processed entirely in your browser. Nothing is uploaded."
+    },
+    "offline": {
+      "title": "Works offline",
+      "body": "Install as a PWA. Use it in the field, no internet required."
+    },
+    "open": {
+      "title": "Open source",
+      "body": "MIT-licensed on GitHub. Audit the code, fork it, run it yourself."
+    },
+    "free": {
+      "title": "No accounts, no ads",
+      "body": "No login. No tracking. No analytics. Free forever."
+    }
+  },
+  "merge": {
+    "title": "Merge {{n}} files",
+    "running": "Merging…",
+    "success": "Done. Combined activity ready.",
+    "summary": {
+      "distance": "Distance",
+      "timer": "Timer",
+      "elapsed": "Elapsed",
+      "laps": "Laps",
+      "records": "Records"
+    },
+    "download": "Download merged.fit",
+    "back": "Start over"
+  },
+  "clean": {
+    "title": "GPS jitter scan",
+    "scanning": "Scanning…",
+    "found": "{{n}} jitter clusters detected",
+    "instruct": "Tick the clusters you want to flatten. Each will be replaced by a single point at the centroid; timestamps and sensor data are preserved.",
+    "selected_summary": "Selected: {{n}} of {{total}} · would remove {{km}} km of fake distance · {{dur}} of stops",
+    "options": {
+      "title": "Detection settings",
+      "radius": "Radius (m)",
+      "minDuration": "Min duration (s)",
+      "minPoints": "Min points",
+      "rescan": "Rescan"
+    },
+    "cluster": {
+      "duration": "duration",
+      "points": "points",
+      "excursion": "max wander",
+      "path": "walked",
+      "centroid": "centroid"
+    },
+    "select_all": "Select all",
+    "select_none": "Clear",
+    "apply": "Clean & download",
+    "back": "Start over"
+  },
+  "errors": {
+    "not_fit": "{{name}} doesn't look like a valid .FIT file.",
+    "merge_needs_two": "Merging needs exactly 2 .fit files.",
+    "clean_needs_one": "Cleaning needs exactly 1 .fit file."
+  },
+  "footer": {
+    "made_with": "Made with",
+    "by": "by",
+    "source": "Source",
+    "issues": "Report an issue"
+  }
+}
