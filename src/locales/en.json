@@ -9,20 +9,21 @@
     "donate": "Buy me a coffee"
   },
   "home": {
-    "headline": "Merge & clean Garmin .FIT activity files",
-    "subhead": "Stitch a split activity back together. Remove GPS jitter from rest stops. All in your browser — your files never leave your device.",
+    "headline": "Merge, clean & convert Garmin .FIT files",
+    "subhead": "Stitch a split activity back together. Remove GPS jitter from rest stops. Convert FIT to GPX. All in your browser — your files never leave your device.",
     "drop": "Drop one or more .fit files here",
     "or": "or",
     "browse": "Browse files",
     "merge_cta": "Merge files",
     "clean_cta": "Find GPS jitter",
-    "two_files_hint": "Add 2 or more files to merge them. Add 1 file to clean GPS jitter.",
+    "gpx_cta": "Convert to GPX",
+    "two_files_hint": "Add 2+ files to merge. Add 1 file to clean GPS jitter or convert to GPX.",
     "merge": {
       "title": "Merge split activities",
       "desc": "Stitch 2+ .fit files into one continuous activity.",
       "bullet1": "Watch ran out of battery mid-ride? Restart created two files? Connect refuses to combine them?",
       "bullet2": "Distance, elevation, heart rate, laps, calories — all preserved and combined.",
-      "bullet3": "Output uploads cleanly to Garmin Connect, Strava, anywhere."
+      "bullet3": "Drag to reorder. Output uploads cleanly to Garmin Connect, Strava, anywhere."
     },
     "clean": {
       "title": "Remove GPS jitter",
@@ -30,13 +31,20 @@
       "bullet1": "Detects every stop where you didn't move but GPS drifted in spaghetti loops.",
       "bullet2": "Pick a fix per cluster (single point / smooth line / leave alone) — see the impact instantly.",
       "bullet3": "Recomputes lap and session distances so totals stop lying."
+    },
+    "gpx": {
+      "title": "Convert FIT → GPX",
+      "desc": "Plain GPX 1.1 export with HR, cadence, altitude, temperature.",
+      "bullet1": "Use FIT files in apps that only read GPX (Komoot, RideWithGPS, Locus, Mapy.cz, OsmAnd…).",
+      "bullet2": "Heart rate, cadence, altitude and temperature kept via Garmin TrackPointExtension v2.",
+      "bullet3": "One trkseg per activity. Sport type set automatically from the FIT session."
     }
   },
   "how": {
     "title": "How it works",
     "step1": {
       "title": "Drop your .fit file(s)",
-      "body": "1 file → clean GPS jitter. 2 or more files → merge into one activity. Files are read locally; nothing is uploaded."
+      "body": "1 file → clean GPS jitter or convert to GPX. 2 or more files → merge into one activity. Files are read locally; nothing is uploaded."
     },
     "step2": {
       "title": "Review on the map",
@@ -71,6 +79,8 @@
     "title": "Merging {{n}} files",
     "running": "Merging…",
     "success": "Done. Combined activity ready.",
+    "order_hint": "Drag to reorder. Files are auto-sorted chronologically by default.",
+    "restore_chrono": "Restore chronological order",
     "summary": {
       "distance": "Distance",
       "timer": "Timer",
@@ -115,10 +125,25 @@
     "apply": "Clean & download",
     "back": "Start over"
   },
+  "gpx": {
+    "title": "FIT → GPX",
+    "converting": "Converting…",
+    "success": "GPX file ready.",
+    "note": "Heart rate, cadence, altitude and temperature are stored using Garmin TrackPointExtension v2 — Strava, Komoot, RideWithGPS and most other tools recognise it.",
+    "summary": {
+      "points": "Points",
+      "distance": "Distance",
+      "elapsed": "Elapsed",
+      "sport": "Sport"
+    },
+    "download": "Download .gpx",
+    "back": "Start over"
+  },
   "errors": {
     "not_fit": "{{name}} doesn't look like a valid .FIT file.",
     "merge_needs_two_plus": "Merging needs at least 2 .fit files.",
-    "clean_needs_one": "Cleaning needs exactly 1 .fit file."
+    "clean_needs_one": "Cleaning needs exactly 1 .fit file.",
+    "gpx_needs_one": "GPX conversion needs exactly 1 .fit file."
   },
   "footer": {
     "made_with": "Made with",

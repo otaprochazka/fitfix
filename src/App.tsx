@@ -4,11 +4,13 @@ import Footer from './components/Footer'
 import HomeView from './components/HomeView'
 import MergeView from './components/MergeView'
 import CleanView from './components/CleanView'
+import GpxView from './components/GpxView'
 
 export type View =
   | { kind: 'home' }
   | { kind: 'merge'; files: File[] }
   | { kind: 'clean'; file: File }
+  | { kind: 'gpx'; file: File }
 
 export default function App() {
   const [view, setView] = useState<View>({ kind: 'home' })
@@ -23,6 +25,9 @@ export default function App() {
         )}
         {view.kind === 'clean' && (
           <CleanView file={view.file} onBack={() => setView({ kind: 'home' })} />
+        )}
+        {view.kind === 'gpx' && (
+          <GpxView file={view.file} onBack={() => setView({ kind: 'home' })} />
         )}
       </main>
       <Footer />
