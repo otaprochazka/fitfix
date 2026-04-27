@@ -9,20 +9,21 @@
     "donate": "Pošli mi kafe"
   },
   "home": {
-    "headline": "Slučování & čištění Garmin .FIT souborů",
-    "subhead": "Slep rozpadlou aktivitu dohromady. Vyčisti GPS motanice z míst, kde ses zastavil. Vše v prohlížeči — soubory neopustí tvoje zařízení.",
+    "headline": "Slučování, čištění & konverze Garmin .FIT souborů",
+    "subhead": "Slep rozpadlou aktivitu dohromady. Vyčisti GPS motanice z míst, kde ses zastavil. Převeď FIT na GPX. Vše v prohlížeči — soubory neopustí tvoje zařízení.",
     "drop": "Sem přetáhni jeden nebo víc .fit souborů",
     "or": "nebo",
     "browse": "Vyber soubory",
     "merge_cta": "Sloučit",
     "clean_cta": "Najít motanice",
-    "two_files_hint": "Přidej 2 a více souborů ke sloučení. Přidej 1 soubor pro čištění GPS motanic.",
+    "gpx_cta": "Převést na GPX",
+    "two_files_hint": "Přidej 2+ souborů ke sloučení. Přidej 1 soubor pro čištění motanic nebo převod na GPX.",
     "merge": {
       "title": "Slučování rozpadlé aktivity",
       "desc": "Slep 2+ .fit souborů do jedné souvislé aktivity.",
       "bullet1": "Hodinky umřely uprostřed jízdy? Restart udělal dva soubory? Connect je odmítá spojit?",
       "bullet2": "Vzdálenost, převýšení, tep, lapy, kalorie — vše zachované a sečtené.",
-      "bullet3": "Výsledek nahraje bez problémů do Connect, Stravy, kamkoliv."
+      "bullet3": "Drag & drop pro změnu pořadí. Výsledek nahraje bez problémů do Connect, Stravy, kamkoliv."
     },
     "clean": {
       "title": "Odstranění GPS motanic",
@@ -30,13 +31,20 @@
       "bullet1": "Detekuje každou pauzu, kde ses nehnul, ale GPS lítalo v špagetových smyčkách.",
       "bullet2": "Pro každou motanici vyber způsob řešení (jeden bod / přímka / nic) — dopad uvidíš okamžitě.",
       "bullet3": "Přepočítá vzdálenosti lapů i celkové aktivity, ať statistiky nelžou."
+    },
+    "gpx": {
+      "title": "Převod FIT → GPX",
+      "desc": "Klasický GPX 1.1 export včetně tepu, kadence, výšky a teploty.",
+      "bullet1": "Použij FIT v aplikacích, které čtou jen GPX (Komoot, RideWithGPS, Locus, Mapy.cz, OsmAnd…).",
+      "bullet2": "Tep, kadence, výška a teplota přes Garmin TrackPointExtension v2.",
+      "bullet3": "Jeden trkseg na aktivitu. Sport se nastaví automaticky podle FIT session."
     }
   },
   "how": {
     "title": "Jak to funguje",
     "step1": {
       "title": "Přetáhni .fit soubor(y)",
-      "body": "1 soubor → čištění motanic. 2+ souborů → sloučení do jedné aktivity. Vše se čte lokálně, nic se neuploaduje."
+      "body": "1 soubor → čištění motanic nebo převod na GPX. 2+ souborů → sloučení do jedné aktivity. Vše se čte lokálně, nic se neuploaduje."
     },
     "step2": {
       "title": "Mrkni na mapu",
@@ -71,6 +79,8 @@
     "title": "Slučování {{n}} souborů",
     "running": "Slučuji…",
     "success": "Hotovo. Sloučená aktivita je připravená.",
+    "order_hint": "Přetáhni řádky pro změnu pořadí. Defaultně řazeno chronologicky.",
+    "restore_chrono": "Obnovit chronologické pořadí",
     "summary": {
       "distance": "Vzdálenost",
       "timer": "Čistý čas",
@@ -115,10 +125,25 @@
     "apply": "Vyčistit & stáhnout",
     "back": "Začít znovu"
   },
+  "gpx": {
+    "title": "FIT → GPX",
+    "converting": "Převádím…",
+    "success": "GPX soubor připraven.",
+    "note": "Tep, kadence, výška a teplota se uloží přes Garmin TrackPointExtension v2 — Strava, Komoot, RideWithGPS a většina dalších nástrojů to umí číst.",
+    "summary": {
+      "points": "Bodů",
+      "distance": "Vzdálenost",
+      "elapsed": "Celkový čas",
+      "sport": "Sport"
+    },
+    "download": "Stáhnout .gpx",
+    "back": "Začít znovu"
+  },
   "errors": {
     "not_fit": "{{name}} nevypadá jako platný .FIT soubor.",
     "merge_needs_two_plus": "Slučování vyžaduje aspoň 2 .fit soubory.",
-    "clean_needs_one": "Čištění vyžaduje přesně 1 .fit soubor."
+    "clean_needs_one": "Čištění vyžaduje přesně 1 .fit soubor.",
+    "gpx_needs_one": "Převod na GPX vyžaduje přesně 1 .fit soubor."
   },
   "footer": {
     "made_with": "Vyrobeno",

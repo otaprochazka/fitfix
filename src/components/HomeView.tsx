@@ -35,6 +35,14 @@ export default function HomeView({ onSelect }: Props) {
     onSelect({ kind: 'clean', file: files[0] })
   }
 
+  const goGpx = () => {
+    if (files.length !== 1) {
+      setError(t('errors.gpx_needs_one'))
+      return
+    }
+    onSelect({ kind: 'gpx', file: files[0] })
+  }
+
   return (
     <>
       <section className="text-center max-w-3xl mx-auto py-8">
@@ -42,37 +50,14 @@ export default function HomeView({ onSelect }: Props) {
         <p className="text-slate-400 text-lg leading-relaxed">{t('home.subhead')}</p>
       </section>
 
-      {/* Two function cards explaining what each does */}
-      <section className="grid md:grid-cols-2 gap-4 mb-6">
-        <div className="card border-slate-700">
-          <div className="flex items-start gap-3 mb-3">
-            <div className="text-3xl" aria-hidden>🧵</div>
-            <div>
-              <h3 className="text-xl text-slate-50 mb-1">{t('home.merge.title')}</h3>
-              <p className="text-sm text-slate-400">{t('home.merge.desc')}</p>
-            </div>
-          </div>
-          <ul className="text-xs text-slate-500 list-disc pl-5 space-y-1">
-            <li>{t('home.merge.bullet1')}</li>
-            <li>{t('home.merge.bullet2')}</li>
-            <li>{t('home.merge.bullet3')}</li>
-          </ul>
-        </div>
-
-        <div className="card border-slate-700">
-          <div className="flex items-start gap-3 mb-3">
-            <div className="text-3xl" aria-hidden>🧹</div>
-            <div>
-              <h3 className="text-xl text-slate-50 mb-1">{t('home.clean.title')}</h3>
-              <p className="text-sm text-slate-400">{t('home.clean.desc')}</p>
-            </div>
-          </div>
-          <ul className="text-xs text-slate-500 list-disc pl-5 space-y-1">
-            <li>{t('home.clean.bullet1')}</li>
-            <li>{t('home.clean.bullet2')}</li>
-            <li>{t('home.clean.bullet3')}</li>
-          </ul>
-        </div>
+      {/* Three function cards */}
+      <section className="grid md:grid-cols-3 gap-4 mb-6">
+        <FunctionCard icon="🧵" title={t('home.merge.title')} desc={t('home.merge.desc')}
+          bullets={[t('home.merge.bullet1'), t('home.merge.bullet2'), t('home.merge.bullet3')]} />
+        <FunctionCard icon="🧹" title={t('home.clean.title')} desc={t('home.clean.desc')}
+          bullets={[t('home.clean.bullet1'), t('home.clean.bullet2'), t('home.clean.bullet3')]} />
+        <FunctionCard icon="📍" title={t('home.gpx.title')} desc={t('home.gpx.desc')}
+          bullets={[t('home.gpx.bullet1'), t('home.gpx.bullet2'), t('home.gpx.bullet3')]} />
       </section>
 
       <DropZone onFiles={handleFiles} />
@@ -100,6 +85,9 @@ export default function HomeView({ onSelect }: Props) {
             <button className="btn-primary" onClick={goClean} disabled={files.length !== 1}>
               🧹 {t('home.clean_cta')}
             </button>
+            <button className="btn-primary" onClick={goGpx} disabled={files.length !== 1}>
+              📍 {t('home.gpx_cta')}
+            </button>
             <button className="btn-ghost ml-auto" onClick={() => { setFiles([]); setError(null) }}>
               ✕ {t('clean.select_none')}
             </button>
@@ -112,5 +100,24 @@ export default function HomeView({ onSelect }: Props) {
 
       <SecurityBadges />
     </>
+  )
+}
+
+function FunctionCard({ icon, title, desc, bullets }: {
+  icon: string; title: string; desc: string; bullets: string[]
+}) {
+  return (
+    <div className="card border-slate-700">
+      <div className="flex items-start gap-3 mb-3">
+        <div className="text-3xl" aria-hidden>{icon}</div>
+        <div>
+          <h3 className="text-xl text-slate-50 mb-1">{title}</h3>
+          <p className="text-sm text-slate-400">{desc}</p>
+        </div>
+      </div>
+      <ul className="text-xs text-slate-500 list-disc pl-5 space-y-1">
+        {bullets.map((b, i) => <li key={i}>{b}</li>)}
+      </ul>
+    </div>
   )
 }

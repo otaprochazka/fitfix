@@ -376,20 +376,18 @@ export function mergeFitWithFreshId(file1: Uint8Array, file2: Uint8Array): Merge
 }
 
 /**
- * Merge N (≥ 2) files. Sorts by detected start time, then chains merges.
- * Final output gets a fresh file_id when `freshenFileId` is true (default).
+ * Merge N (≥ 2) files in the order given. Caller is responsible for ordering
+ * (use `sortByStartTime` if you want chronological order). Final output gets
+ * a fresh file_id when `freshenFileId` is true (default).
  */
 export function mergeFitMany(files: Uint8Array[], freshenFileId = true): MergeResult {
   if (files.length < 2)
     throw new Error('Need at least 2 files to merge')
 
-  // Sort by first record timestamp so chronological order is correct
-  const sorted = [...files].sort((a, b) => firstRecordTs(a) - firstRecordTs(b))
-
-  let acc: Uint8Array = sorted[0]
+  let acc: Uint8Array = files[0]
   let last: MergeResult | null = null
-  for (let i = 1; i < sorted.length; i++) {
-    last = mergeFit(acc, sorted[i])
+  for (let i = 1; i < files.length; i++) {
+    last = mergeFit(acc, files[i])
     acc = last.output
   }
   return {
@@ -402,11 +400,19 @@ export function mergeFitMany(files: Uint8Array[], freshenFileId = true): MergeRe
   }
 }
 
-function firstRecordTs(data: Uint8Array): number {
+/** Read the first record's timestamp from a FIT file, in FIT-epoch seconds. */
+export function firstRecordTs(data: Uint8Array): number {
   for (const m of walkMessages(data)) {
     if (m.kind !== 'data' || m.def.globalNum !== RECORD) continue
     const ts = readField(data, m.bodyOffset, m.def, 253, 'uint32')
     if (ts != null) return ts
   }
   return Number.MAX_SAFE_INTEGER
+}
+
+/** Sort items chronologically by the first-record timestamp of their bytes. */
+export function sortByStartTime<T>(items: T[], getBytes: (item: T) => Uint8Array): T[] {
+  const tagged = items.map(item => ({ item, ts: firstRecordTs(getBytes(item)) }))
+  tagged.sort((a, b) => a.ts - b.ts)
+  return tagged.map(t => t.item)
 }
