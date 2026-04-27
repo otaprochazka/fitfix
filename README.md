@@ -55,6 +55,13 @@ Anywhere static. The `dist/` directory is a self-contained PWA. Vercel autodetec
 - [Leaflet](https://leafletjs.com/) for the map.
 - [CartoDB](https://carto.com/attribution/), [OpenStreetMap](https://www.openstreetmap.org/copyright), [OpenTopoMap](https://opentopomap.org/about), [Esri](https://www.esri.com/) for tiles.
 
+## Contributing / agents
+
+Working on the codebase (human or AI)? Read **[AGENTS.md](AGENTS.md)** first
+— it covers the repo layout, the FIT format gotchas, the encoder LRU bug
+that keeps trying to come back, the dev / build / deploy commands, and the
+PR workflow. Saves a few hours of re-deriving them.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
