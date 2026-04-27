@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { mergeFitMany, sortByStartTime, type MergeResult } from '../lib/merge'
 import { fitToGpx } from '../lib/fitToGpx'
 import { downloadBlob } from '../lib/download'
+import TrackPreview from './TrackPreview'
 
 interface Props {
   files: File[]
@@ -155,20 +156,50 @@ export default function MergeView({ files, onBack }: Props) {
       {result && !running && (
         <div className="card">
           <p className="text-brand-400 font-medium mb-4">✓ {t('merge.success')}</p>
-          <dl className="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-6 text-center">
-            {[
-              { k: 'distance', v: `${(result.totalDistanceM / 1000).toFixed(2)} km` },
-              { k: 'timer',    v: formatDuration(result.totalTimerS) },
-              { k: 'elapsed',  v: formatDuration(result.totalElapsedS) },
-              { k: 'laps',     v: String(result.numLaps) },
-              { k: 'records',  v: String(result.numRecords) },
-            ].map(({ k, v }) => (
-              <div key={k}>
-                <dt className="text-xs text-slate-500 uppercase tracking-wide">{t(`merge.summary.${k}`)}</dt>
-                <dd className="text-2xl font-semibold text-slate-100">{v}</dd>
-              </div>
-            ))}
+
+          {result.startTs && result.endTs && (
+            <p className="text-sm text-slate-400 mb-4">
+              {result.sport ? <span className="text-slate-200 font-medium">{result.sport}</span> : null}
+              {result.sport ? ' · ' : ''}
+              {result.startTs.toLocaleString()} → {result.endTs.toLocaleString()}
+            </p>
+          )}
+
+          <dl className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
+            <Stat label={t('merge.summary.distance')} value={`${(result.totalDistanceM / 1000).toFixed(2)} km`} />
+            <Stat label={t('merge.summary.timer')} value={formatDuration(result.totalTimerS)} />
+            <Stat label={t('merge.summary.elapsed')} value={formatDuration(result.totalElapsedS)} />
+            <Stat label={t('merge.summary.laps')} value={String(result.numLaps)} />
+            {result.totalAscentM != null && (
+              <Stat label={t('merge.summary.ascent')} value={`${result.totalAscentM} m`} icon="↑" />
+            )}
+            {result.totalDescentM != null && (
+              <Stat label={t('merge.summary.descent')} value={`${result.totalDescentM} m`} icon="↓" />
+            )}
+            {result.totalCalories != null && (
+              <Stat label={t('merge.summary.calories')} value={`${result.totalCalories} kcal`} />
+            )}
+            {result.avgSpeedMps != null && (
+              <Stat label={t('merge.summary.avg_speed')} value={`${(result.avgSpeedMps * 3.6).toFixed(2)} km/h`} />
+            )}
+            {result.maxSpeedMps != null && (
+              <Stat label={t('merge.summary.max_speed')} value={`${(result.maxSpeedMps * 3.6).toFixed(2)} km/h`} />
+            )}
+            {result.avgHeartRate != null && (
+              <Stat label={t('merge.summary.avg_hr')} value={`${result.avgHeartRate} bpm`} />
+            )}
+            {result.maxHeartRate != null && (
+              <Stat label={t('merge.summary.max_hr')} value={`${result.maxHeartRate} bpm`} />
+            )}
+            <Stat label={t('merge.summary.records')} value={String(result.numRecords)} />
           </dl>
+
+          <div className="mb-6">
+            <h3 className="text-sm text-slate-400 uppercase tracking-wide mb-2">
+              {t('merge.summary.track')}
+            </h3>
+            <TrackPreview data={result.output} heightClass="h-72 sm:h-96" />
+          </div>
 
           <label className="flex items-start gap-2 mb-4 cursor-pointer">
             <input
@@ -195,5 +226,17 @@ export default function MergeView({ files, onBack }: Props) {
         </div>
       )}
     </section>
+  )
+}
+
+function Stat({ label, value, icon }: { label: string; value: string; icon?: string }) {
+  return (
+    <div>
+      <dt className="text-xs text-slate-500 uppercase tracking-wide">{label}</dt>
+      <dd className="text-2xl font-semibold text-slate-100">
+        {icon && <span className="text-brand-400 mr-1" aria-hidden>{icon}</span>}
+        {value}
+      </dd>
+    </div>
   )
 }

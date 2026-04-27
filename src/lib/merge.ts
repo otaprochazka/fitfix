@@ -12,8 +12,17 @@
 
 import {
   walkMessages, parseHeader, readField, writeField, fitCrc16,
-  dateToFitTs, type FitDef,
+  dateToFitTs, FIT_EPOCH_S, type FitDef,
 } from './fit'
+
+const SPORT_LABEL: Record<number, string> = {
+  0: 'Generic', 1: 'Running', 2: 'Cycling', 3: 'Transition',
+  4: 'Fitness Equipment', 5: 'Swimming', 10: 'Training', 11: 'Walking',
+  12: 'Cross Country Skiing', 13: 'Alpine Skiing', 14: 'Snowboarding',
+  15: 'Rowing', 16: 'Mountaineering', 17: 'Hiking', 18: 'Multisport',
+  19: 'Paddling', 21: 'E-Biking', 30: 'Inline Skating', 31: 'Rock Climbing',
+  35: 'Snowshoeing', 41: 'Kayaking',
+}
 
 const SESSION = 18
 const RECORD = 20
@@ -28,6 +37,16 @@ export interface MergeResult {
   totalElapsedS: number
   numLaps: number
   numRecords: number
+  totalCalories?: number
+  totalAscentM?: number
+  totalDescentM?: number
+  maxHeartRate?: number
+  avgHeartRate?: number
+  maxSpeedMps?: number
+  avgSpeedMps?: number
+  sport?: string
+  startTs?: Date
+  endTs?: Date
 }
 
 /** Merge two .FIT inputs in chronological order. */
@@ -68,6 +87,16 @@ export function mergeFit(file1: Uint8Array, file2: Uint8Array): MergeResult {
     totalElapsedS: merged.totalElapsedS,
     numLaps: merged.numLaps,
     numRecords: firstSessionBody.records + secondSessionBody.records,
+    totalCalories: merged.totalCalories,
+    totalAscentM: merged.totalAscentM,
+    totalDescentM: merged.totalDescentM,
+    maxHeartRate: merged.maxHeartRate,
+    avgHeartRate: merged.avgHeartRate,
+    maxSpeedMps: merged.maxSpeedMps,
+    avgSpeedMps: merged.avgSpeedMps,
+    sport: merged.sport,
+    startTs: merged.startTs,
+    endTs: merged.endTs,
   }
 }
 
@@ -78,11 +107,48 @@ interface ActiveDef {
   defBytes: Uint8Array  // bytes of the def message body (after the header byte)
   signature: string
   devFlag: boolean
+  lastUsedTick: number  // for LRU eviction when all 16 slots are full
+}
+
+/**
+ * Output buffer with O(1) appends and a single-pass copy at the end.
+ * `number[].push` works but creates dense JS arrays which are slow to dump
+ * to a Uint8Array; this grows a typed buffer geometrically instead.
+ */
+class ByteBuf {
+  private buf: Uint8Array = new Uint8Array(64 * 1024)
+  private len = 0
+
+  private grow(min: number) {
+    let cap = this.buf.length
+    while (cap < min) cap *= 2
+    const next = new Uint8Array(cap)
+    next.set(this.buf.subarray(0, this.len))
+    this.buf = next
+  }
+
+  push(b: number) {
+    if (this.len + 1 > this.buf.length) this.grow(this.len + 1)
+    this.buf[this.len++] = b
+  }
+
+  pushBytes(bytes: Uint8Array) {
+    if (this.len + bytes.length > this.buf.length) this.grow(this.len + bytes.length)
+    this.buf.set(bytes, this.len)
+    this.len += bytes.length
+  }
+
+  get length() { return this.len }
+
+  view(): Uint8Array {
+    return this.buf.subarray(0, this.len)
+  }
 }
 
 class FitEncoder {
-  private out: number[] = []
+  private out = new ByteBuf()
   private localDefs: (ActiveDef | null)[] = new Array(16).fill(null)
+  private tick = 0
   // Track maximum protocol/profile observed so we can match in the header
   private protocol = 0x20
   private profile = 0
@@ -94,35 +160,60 @@ class FitEncoder {
 
   /** Emit a message: ensures the def is currently bound, then writes data. */
   emit(def: FitDef, body: Uint8Array, defBytes?: Uint8Array, devFlag = false): void {
-    const sig = defSignature(def)
-    let slot = this.localDefs.findIndex(d => d?.signature === sig)
-    if (slot < 0) {
-      // Allocate: prefer first empty, else evict slot 0
-      slot = this.localDefs.findIndex(d => d === null)
-      if (slot < 0) slot = 0
-      const bytes = defBytes ?? buildDefBytes(def)
-      this.localDefs[slot] = { def, defBytes: bytes, signature: sig, devFlag }
-      // Write definition header byte: bit6=1 (def), bit5=devFlag
-      this.out.push(0x40 | (devFlag ? 0x20 : 0) | slot)
-      for (const b of bytes) this.out.push(b)
-    }
-    // Write data header byte (just local num, normal header)
-    this.out.push(slot & 0x0F)
     if (body.length !== def.bodySize)
       throw new Error(`body length ${body.length} != def.bodySize ${def.bodySize}`)
-    for (const b of body) this.out.push(b)
+
+    const sig = defSignature(def)
+    let slot = this.findActiveSlot(sig)
+    if (slot < 0) {
+      slot = this.allocateSlot()
+      const bytes = defBytes ?? buildDefBytes(def)
+      this.localDefs[slot] = {
+        def, defBytes: bytes, signature: sig, devFlag,
+        lastUsedTick: ++this.tick,
+      }
+      // Definition message header byte: bit6=1 (def), bit5=devFlag
+      this.out.push(0x40 | (devFlag ? 0x20 : 0) | slot)
+      this.out.pushBytes(bytes)
+    } else {
+      this.localDefs[slot]!.lastUsedTick = ++this.tick
+    }
+    // Data record header byte (just local num)
+    this.out.push(slot & 0x0F)
+    this.out.pushBytes(body)
+  }
+
+  private findActiveSlot(sig: string): number {
+    for (let i = 0; i < this.localDefs.length; i++) {
+      if (this.localDefs[i]?.signature === sig) return i
+    }
+    return -1
+  }
+
+  /** Pick a slot: prefer empty, otherwise evict the least-recently-used. */
+  private allocateSlot(): number {
+    let oldest = 0
+    let oldestTick = Infinity
+    for (let i = 0; i < this.localDefs.length; i++) {
+      const d = this.localDefs[i]
+      if (d === null) return i
+      if (d.lastUsedTick < oldestTick) {
+        oldestTick = d.lastUsedTick
+        oldest = i
+      }
+    }
+    return oldest
   }
 
   /** Current data section bytes (without header / final CRC). */
   bytes(): Uint8Array {
-    return new Uint8Array(this.out)
+    return this.out.view()
   }
 
   finalize(): Uint8Array {
     const dataLen = this.out.length
     const total = 14 + dataLen + 2
     const final = new Uint8Array(total)
-    // File header
     final[0] = 14
     final[1] = this.protocol || 0x20
     new DataView(final.buffer).setUint16(2, this.profile || 100, true)
@@ -130,9 +221,7 @@ class FitEncoder {
     final[8] = 0x2E; final[9] = 0x46; final[10] = 0x49; final[11] = 0x54
     const headerCrc = fitCrc16(final, 0, 12)
     new DataView(final.buffer).setUint16(12, headerCrc, true)
-    // Body
-    for (let i = 0; i < dataLen; i++) final[14 + i] = this.out[i]
-    // File CRC
+    final.set(this.out.view(), 14)
     const fileCrc = fitCrc16(final, 0, total - 2)
     new DataView(final.buffer).setUint16(total - 2, fileCrc, true)
     return final
@@ -213,6 +302,16 @@ interface SynthOut {
   totalTimerS: number
   totalElapsedS: number
   numLaps: number
+  totalCalories?: number
+  totalAscentM?: number
+  totalDescentM?: number
+  maxHeartRate?: number
+  avgHeartRate?: number
+  maxSpeedMps?: number
+  avgSpeedMps?: number
+  sport?: string
+  startTs?: Date
+  endTs?: Date
 }
 
 function synthesizeSession(
@@ -248,6 +347,8 @@ function synthesizeSession(
   const maxSpd2 = r(s2.body, s2.def, 15, 'uint16')
   const endLat = r(s2.body, s2.def, 5, 'sint32')     // end_position_lat
   const endLon = r(s2.body, s2.def, 6, 'sint32')
+  const sportNum = r(s1.body, s1.def, 5, 'uint8') ?? r(s2.body, s2.def, 5, 'uint8')
+  const startTs1 = r(s1.body, s1.def, 2, 'uint32')   // start_time
 
   const totalElapsed = sumOpt(elapsed1, elapsed2)
   const totalTimer = sumOpt(timer1, timer2)
@@ -288,12 +389,25 @@ function synthesizeSession(
     writeField(out, 0, s1.def, 14, 'uint16', Math.round(avgSp * 1000))
   }
 
+  const totalDistanceM = (totalDist ?? 0) / 100
+  const totalTimerS = (totalTimer ?? 0) / 1000
+
   return {
     body: out,
-    totalDistanceM: (totalDist ?? 0) / 100,
-    totalTimerS: (totalTimer ?? 0) / 1000,
+    totalDistanceM,
+    totalTimerS,
     totalElapsedS: (totalElapsed ?? 0) / 1000,
     numLaps: totalLaps ?? 0,
+    totalCalories: totalCal ?? undefined,
+    totalAscentM: totalAscent ?? undefined,
+    totalDescentM: totalDescent ?? undefined,
+    maxHeartRate: maxHr ?? undefined,
+    avgHeartRate: avgHr ?? undefined,
+    maxSpeedMps: maxSpd != null ? maxSpd / 1000 : undefined,
+    avgSpeedMps: totalTimerS > 0 ? totalDistanceM / totalTimerS : undefined,
+    sport: sportNum != null ? SPORT_LABEL[sportNum] ?? `Sport #${sportNum}` : undefined,
+    startTs: startTs1 != null ? new Date((FIT_EPOCH_S + startTs1) * 1000) : undefined,
+    endTs: endTimestamp != null ? new Date((FIT_EPOCH_S + endTimestamp) * 1000) : undefined,
   }
 }
 
@@ -391,12 +505,8 @@ export function mergeFitMany(files: Uint8Array[], freshenFileId = true): MergeRe
     acc = last.output
   }
   return {
+    ...last!,
     output: freshenFileId ? bumpFileId(acc) : acc,
-    totalDistanceM: last!.totalDistanceM,
-    totalTimerS: last!.totalTimerS,
-    totalElapsedS: last!.totalElapsedS,
-    numLaps: last!.numLaps,
-    numRecords: last!.numRecords,
   }
 }
 

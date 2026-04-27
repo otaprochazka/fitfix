@@ -98,7 +98,15 @@
       "timer": "Timer",
       "elapsed": "Elapsed",
       "laps": "Laps",
-      "records": "Records"
+      "records": "Records",
+      "ascent": "Ascent",
+      "descent": "Descent",
+      "calories": "Calories",
+      "avg_speed": "Avg speed",
+      "max_speed": "Max speed",
+      "avg_hr": "Avg HR",
+      "max_hr": "Max HR",
+      "track": "Combined track"
     },
     "options": {
       "fresh_id": "Make file uploadable to Garmin Connect (new file ID)",

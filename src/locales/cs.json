@@ -98,7 +98,15 @@
       "timer": "Čistý čas",
       "elapsed": "Celkový čas",
       "laps": "Lapy",
-      "records": "Body"
+      "records": "Body",
+      "ascent": "Stoupání",
+      "descent": "Klesání",
+      "calories": "Kalorie",
+      "avg_speed": "Prům. rychlost",
+      "max_speed": "Max. rychlost",
+      "avg_hr": "Prům. tep",
+      "max_hr": "Max. tep",
+      "track": "Sloučená trasa"
     },
     "options": {
       "fresh_id": "Připravit pro nahrání do Garmin Connect (nové file ID)",
