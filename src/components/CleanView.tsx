@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { scanFitForClusters, type JitterCluster, type RecordPoint } from '../lib/findClusters'
 import { cleanJitter, previewSavings, type Resolution } from '../lib/cleanJitter'
+import { fitToGpx } from '../lib/fitToGpx'
+import { downloadBlob } from '../lib/download'
 import JitterMap from './JitterMap'
 
 interface Props {
@@ -89,15 +91,24 @@ export default function CleanView({ file, onBack }: Props) {
     setMode(i, cur === 'keep' ? 'pin' : 'keep')
   }
 
-  const apply = () => {
-    if (!bytes) return
-    const result = cleanJitter(bytes, { ...settings, resolutions, freshenFileId: freshenId })
-    const blob = new Blob([result.output.buffer.slice(0) as ArrayBuffer], { type: 'application/octet-stream' })
-    const a = document.createElement('a')
-    a.href = URL.createObjectURL(blob)
-    const base = file.name.replace(/\.fit$/i, '')
-    a.download = `${base}_clean.fit`
-    a.click()
+  const cleanedBytes = (): Uint8Array | null => {
+    if (!bytes) return null
+    return cleanJitter(bytes, { ...settings, resolutions, freshenFileId: freshenId }).output
+  }
+
+  const base = file.name.replace(/\.fit$/i, '')
+
+  const downloadFit = () => {
+    const out = cleanedBytes()
+    if (!out) return
+    downloadBlob(out, `${base}_clean.fit`, 'application/octet-stream')
+  }
+
+  const downloadGpx = () => {
+    const out = cleanedBytes()
+    if (!out) return
+    const gpx = fitToGpx(out)
+    downloadBlob(gpx.gpx, `${base}_clean.gpx`, 'application/gpx+xml')
   }
 
   return (
@@ -152,7 +163,7 @@ export default function CleanView({ file, onBack }: Props) {
             </details>
 
             <div className="card">
-              <p className="text-sm text-brand-400 font-medium mb-2">
+              <p className="text-sm text-slate-100 font-semibold mb-2">
                 {t('clean.selected_summary', {
                   km: (preview.totalSavedM / 1000).toFixed(2),
                   m: Math.round(preview.totalSavedM),
@@ -162,7 +173,11 @@ export default function CleanView({ file, onBack }: Props) {
               <div className="text-xs text-slate-500 mb-2">{t('clean.set_all')}</div>
               <div className="grid grid-cols-3 gap-1 mb-3">
                 {MODES.map(m => (
-                  <button key={m} className="btn-ghost text-xs" onClick={() => setAllModes(m)}>
+                  <button
+                    key={m}
+                    className="text-xs px-2 py-1.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700"
+                    onClick={() => setAllModes(m)}
+                  >
                     {modeLabel(m, t)}
                   </button>
                 ))}
@@ -192,10 +207,10 @@ export default function CleanView({ file, onBack }: Props) {
                             key={m}
                             onClick={() => setMode(i, m)}
                             title={t(`clean.modes.${m}_help`) ?? ''}
-                            className={`text-xs px-2 py-1 rounded transition-colors ${
+                            className={`text-xs px-2 py-1 rounded transition-colors border ${
                               cur === m
-                                ? 'bg-brand-500 text-slate-950 font-medium'
-                                : 'bg-slate-700/60 text-slate-300 hover:bg-slate-700'
+                                ? 'bg-slate-900 text-brand-300 border-brand-500/50 font-medium'
+                                : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200 hover:border-slate-600'
                             }`}
                           >{modeLabel(m, t)}</button>
                         ))}
@@ -224,9 +239,17 @@ export default function CleanView({ file, onBack }: Props) {
               </div>
             </label>
 
-            <button className="btn-primary w-full" onClick={apply}>
-              ✨ {t('clean.apply')}
-            </button>
+            <div className="space-y-2">
+              <button className="btn-primary w-full" onClick={downloadFit}>
+                ✨ {t('clean.apply')}
+              </button>
+              <button
+                className="w-full text-sm py-2 rounded border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-200"
+                onClick={downloadGpx}
+              >
+                📍 {t('clean.also_gpx')}
+              </button>
+            </div>
           </aside>
         </div>
       )}

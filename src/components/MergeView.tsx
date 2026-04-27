@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { mergeFitMany, sortByStartTime, type MergeResult } from '../lib/merge'
+import { fitToGpx } from '../lib/fitToGpx'
+import { downloadBlob } from '../lib/download'
 
 interface Props {
   files: File[]
@@ -66,11 +68,13 @@ export default function MergeView({ files, onBack }: Props) {
 
   const download = () => {
     if (!result) return
-    const blob = new Blob([result.output.buffer.slice(0) as ArrayBuffer], { type: 'application/octet-stream' })
-    const a = document.createElement('a')
-    a.href = URL.createObjectURL(blob)
-    a.download = 'merged.fit'
-    a.click()
+    downloadBlob(result.output, 'merged.fit', 'application/octet-stream')
+  }
+
+  const downloadGpx = () => {
+    if (!result) return
+    const gpx = fitToGpx(result.output)
+    downloadBlob(gpx.gpx, 'merged.gpx', 'application/gpx+xml')
   }
 
   const move = (from: number, to: number) => {
@@ -179,7 +183,15 @@ export default function MergeView({ files, onBack }: Props) {
             </div>
           </label>
 
-          <button className="btn-primary" onClick={download}>📥 {t('merge.download')}</button>
+          <div className="flex flex-wrap gap-2">
+            <button className="btn-primary" onClick={download}>📥 {t('merge.download')}</button>
+            <button
+              className="text-sm px-4 py-2 rounded border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-200"
+              onClick={downloadGpx}
+            >
+              📍 {t('merge.also_gpx')}
+            </button>
+          </div>
         </div>
       )}
     </section>

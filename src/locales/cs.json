@@ -8,6 +8,12 @@
     "language": "Jazyk",
     "donate": "Pošli mi kafe"
   },
+  "trust": {
+    "local": "100% lokální — soubory neopustí tvoje zařízení",
+    "open": "Open source (MIT)",
+    "no_ads": "Žádné reklamy, žádný tracking",
+    "offline": "Funguje offline"
+  },
   "home": {
     "headline": "Slučování, čištění & konverze Garmin .FIT souborů",
     "subhead": "Slep rozpadlou aktivitu dohromady. Vyčisti GPS motanice z míst, kde ses zastavil. Převeď FIT na GPX. Vše v prohlížeči — soubory neopustí tvoje zařízení.",
@@ -55,7 +61,8 @@
       "body": "Výstupní .fit je bit-identický s originálem až na pole, která jsi změnil. Volitelně se pohne file ID, aby to Garmin Connect bral jako nový soubor."
     },
     "screenshot_alt": "Ukázka mapy s detekovanými GPS motanicemi",
-    "screenshot_caption": "Číslované červené clustery označují, kde GPS lítala, když ses nehýbal. Vyber, které srovnat."
+    "screenshot_label": "Náhled · čištění GPS motanic",
+    "screenshot_caption": "Číslované clustery označují, kde GPS lítala, když ses nehýbal. Vyber, které srovnat."
   },
   "security": {
     "local": {
@@ -93,6 +100,7 @@
       "fresh_id_help": "Garmin Connect odmítá soubory s ID, které už zná. Změnou ID půjde sloučený výsledek nahrát i když jsi předtím nahrál originály."
     },
     "download": "Stáhnout merged.fit",
+    "also_gpx": "Také jako .gpx",
     "back": "Začít znovu"
   },
   "clean": {
@@ -122,7 +130,8 @@
     "saved": "ušetří {{m}} m",
     "neutral": "beze změny",
     "set_all": "Nastav vše na:",
-    "apply": "Vyčistit & stáhnout",
+    "apply": "Vyčistit & stáhnout .fit",
+    "also_gpx": "Také jako .gpx",
     "back": "Začít znovu"
   },
   "gpx": {
