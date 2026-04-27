@@ -24,9 +24,12 @@
     "clean_cta": "Najít motanice",
     "gpx_cta": "Převést na GPX",
     "two_files_hint": "Přidej 2+ souborů ke sloučení. Přidej 1 soubor pro čištění motanic nebo převod na GPX.",
+    "uploaded": "Nahrané soubory",
+    "clear_all": "Smazat vše",
     "merge": {
       "title": "Slučování rozpadlé aktivity",
       "desc": "Slep 2+ .fit souborů do jedné souvislé aktivity.",
+      "requires": "Pro aktivaci přidej alespoň 2 .fit soubory.",
       "bullet1": "Hodinky umřely uprostřed jízdy? Restart udělal dva soubory? Connect je odmítá spojit?",
       "bullet2": "Vzdálenost, převýšení, tep, lapy, kalorie — vše zachované a sečtené.",
       "bullet3": "Drag & drop pro změnu pořadí. Výsledek nahraje bez problémů do Connect, Stravy, kamkoliv."
@@ -34,6 +37,7 @@
     "clean": {
       "title": "Odstranění GPS motanic",
       "desc": "Najdi místa, kde hodinky stály, ale GPS to motalo.",
+      "requires": "Pro aktivaci přidej přesně 1 .fit soubor.",
       "bullet1": "Detekuje každou pauzu, kde ses nehnul, ale GPS lítalo v špagetových smyčkách.",
       "bullet2": "Pro každou motanici vyber způsob řešení (jeden bod / přímka / nic) — dopad uvidíš okamžitě.",
       "bullet3": "Přepočítá vzdálenosti lapů i celkové aktivity, ať statistiky nelžou."
@@ -41,6 +45,7 @@
     "gpx": {
       "title": "Převod FIT → GPX",
       "desc": "Klasický GPX 1.1 export včetně tepu, kadence, výšky a teploty.",
+      "requires": "Pro aktivaci přidej přesně 1 .fit soubor.",
       "bullet1": "Použij FIT v aplikacích, které čtou jen GPX (Komoot, RideWithGPS, Locus, Mapy.cz, OsmAnd…).",
       "bullet2": "Tep, kadence, výška a teplota přes Garmin TrackPointExtension v2.",
       "bullet3": "Jeden trkseg na aktivitu. Sport se nastaví automaticky podle FIT session."
@@ -159,6 +164,7 @@
     "by": "od",
     "source": "Zdrojový kód",
     "issues": "Nahlásit chybu",
+    "feature_request": "Chybí funkce?",
     "donate": "Pošli mi kafe"
   }
 }
