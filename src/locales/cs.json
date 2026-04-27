@@ -133,10 +133,10 @@
       "fresh_id_help": "Garmin Connect odmítá soubory s ID, které už zná. Změnou ID půjde vyčištěný výsledek nahrát i když jsi předtím nahrál originál."
     },
     "modes": {
-      "pin": "Bod",
-      "pin_help": "Všechny body se sjednotí na jednom místě. Nejlepší, když ses tam reálně zastavil.",
-      "smooth": "Přímka",
-      "smooth_help": "Nahradí motanici přímkou ze začátku do konce. Nejlepší, když ses pomalu pohyboval.",
+      "pin": "Stál jsem",
+      "pin_help": "Všechny body sjednotí na jednom místě (centroid). Nejlepší, když ses fakt nehnul — prostě cákls baterku, čekal na kámoše atd.",
+      "smooth": "Tam a zpět",
+      "smooth_help": "Místo motanice nakreslí trojúhelník: ze začátku k nejvzdálenějšímu bodu a zpátky na konec. Nejlepší, když jsi reálně někam odběhl a vrátil se.",
       "keep": "Nechat",
       "keep_help": "Tuhle motanici neměnit. Použij, když je GPS vlastně v pořádku."
     },

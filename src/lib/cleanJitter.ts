@@ -5,8 +5,11 @@
  *
  * Resolution modes per cluster:
  *   pin    — every point in the cluster snaps to its centroid (best for stops)
- *   smooth — points are linearly interpolated between the cluster's first and
- *            last "real" position (best for slow movement with GPS noise)
+ *   smooth — every point is projected onto the cluster's principal axis (the
+ *            line through the two most-distant points). This preserves any
+ *            back-and-forth walking along that axis but removes perpendicular
+ *            jitter — good when the user genuinely wandered there, e.g.
+ *            walked there and back.
  *   keep   — leave the cluster's points untouched
  *
  * Modifies on output:
@@ -44,6 +47,108 @@ export interface CleanOptions extends ClusterOptions {
   freshenFileId?: boolean
 }
 
+/**
+ * "Back-and-forth" model: replace a wander cluster with a triangular detour —
+ * start → farthest excursion → end. Models the case where the user genuinely
+ * walked out somewhere, then came back, instead of standing still (pin) or
+ * walking on a perfect straight line (which would erase basically all
+ * distance).
+ *
+ * Returns one position per point in `c.points`, parallel to
+ * records[c.idxStart..c.idxEnd]. The cluster's points are distributed evenly
+ * along the two legs of the triangle, with the apex at the index of the
+ * farthest excursion in the original sequence.
+ */
+export function backAndForthPath(
+  c: JitterCluster,
+): { lat: number; lon: number }[] {
+  const pts = c.points
+  if (pts.length === 0) return []
+  if (pts.length === 1) return [{ lat: pts[0].lat, lon: pts[0].lon }]
+
+  const start = pts[0]
+  const end = pts[pts.length - 1]
+
+  // Find the in-between point with the largest perpendicular offset from the
+  // start↔end line. That's the "tip" of the back-and-forth detour.
+  const dx = end.lat - start.lat
+  const dy = end.lon - start.lon
+  const denom = dx * dx + dy * dy
+  let iFar = Math.floor(pts.length / 2)
+  let dmax = -1
+  for (let i = 1; i < pts.length - 1; i++) {
+    const p = pts[i]
+    let d2: number
+    if (denom === 0) {
+      const ex = p.lat - start.lat
+      const ey = p.lon - start.lon
+      d2 = ex * ex + ey * ey
+    } else {
+      const cross = (p.lat - start.lat) * dy - (p.lon - start.lon) * dx
+      d2 = (cross * cross) / denom
+    }
+    if (d2 > dmax) { dmax = d2; iFar = i }
+  }
+  const apex = pts[iFar]
+
+  // Distribute points along start→apex→end. Apex sits exactly at iFar so the
+  // record at that index lands on the tip (matches the original timing).
+  const out: { lat: number; lon: number }[] = []
+  for (let i = 0; i < pts.length; i++) {
+    if (i <= iFar) {
+      const t = iFar === 0 ? 0 : i / iFar
+      out.push({
+        lat: start.lat + (apex.lat - start.lat) * t,
+        lon: start.lon + (apex.lon - start.lon) * t,
+      })
+    } else {
+      const span = pts.length - 1 - iFar
+      const t = span === 0 ? 1 : (i - iFar) / span
+      out.push({
+        lat: apex.lat + (end.lat - apex.lat) * t,
+        lon: apex.lon + (end.lon - apex.lon) * t,
+      })
+    }
+  }
+  return out
+}
+
+/**
+ * The 3 vertices of the back-and-forth triangle (start, apex, end). Used by
+ * the map preview so the V-shape is drawn cleanly with one polyline instead
+ * of N tiny segments along its legs.
+ */
+export function backAndForthVertices(
+  c: JitterCluster,
+): { lat: number; lon: number }[] {
+  const path = backAndForthPath(c)
+  if (path.length < 2) return path
+  // Find the apex by scanning for the maximum cumulative direction reversal.
+  // Easier: re-derive iFar exactly like backAndForthPath does.
+  const pts = c.points
+  const start = pts[0]
+  const end = pts[pts.length - 1]
+  const dx = end.lat - start.lat
+  const dy = end.lon - start.lon
+  const denom = dx * dx + dy * dy
+  let iFar = Math.floor(pts.length / 2)
+  let dmax = -1
+  for (let i = 1; i < pts.length - 1; i++) {
+    const p = pts[i]
+    let d2: number
+    if (denom === 0) {
+      const ex = p.lat - start.lat
+      const ey = p.lon - start.lon
+      d2 = ex * ex + ey * ey
+    } else {
+      const cross = (p.lat - start.lat) * dy - (p.lon - start.lon) * dx
+      d2 = (cross * cross) / denom
+    }
+    if (d2 > dmax) { dmax = d2; iFar = i }
+  }
+  return [start, pts[iFar], end]
+}
+
 /** Compute new positions per record under a given per-cluster resolution map. */
 function applyResolutions(
   records: RecordPoint[],
@@ -60,16 +165,10 @@ function applyResolutions(
         out[k] = { ...c.centroid }
       }
     } else if (mode === 'smooth') {
-      const a = out[c.idxStart]
-      const b = out[c.idxEnd]
-      const span = c.idxEnd - c.idxStart
-      if (span <= 0) continue
+      const proj = backAndForthPath(c)
       for (let k = c.idxStart; k <= c.idxEnd; k++) {
-        const t = (k - c.idxStart) / span
-        out[k] = {
-          lat: a.lat + (b.lat - a.lat) * t,
-          lon: a.lon + (b.lon - a.lon) * t,
-        }
+        const idx = k - c.idxStart
+        if (idx < proj.length) out[k] = proj[idx]
       }
     }
   }
@@ -89,10 +188,7 @@ export function previewSavings(
     const mode: Resolution = resolutions[i + 1] ?? 'keep'
     let newLen = c.pathLengthM
     if (mode === 'pin') newLen = 0
-    else if (mode === 'smooth') newLen = haversine(
-      c.points[0].lat, c.points[0].lon,
-      c.points[c.points.length - 1].lat, c.points[c.points.length - 1].lon,
-    )
+    else if (mode === 'smooth') newLen = pathLength(backAndForthVertices(c))
     const saved = c.pathLengthM - newLen
     total += saved
     return { number: i + 1, mode, savedM: saved }

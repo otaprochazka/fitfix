@@ -15,7 +15,7 @@ export default function Header() {
             <circle cx="50" cy="20" r="4" fill="#2dd4bf"/>
           </svg>
           <div className="leading-tight">
-            <div className="text-slate-50 font-semibold text-lg">{t('app.name')}</div>
+            <div className="text-slate-50 font-semibold text-xl sm:text-2xl">{t('app.name')}</div>
             <div className="text-slate-500 text-xs hidden sm:block">{t('app.tagline')}</div>
           </div>
         </a>

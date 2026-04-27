@@ -133,10 +133,10 @@
       "fresh_id_help": "Garmin Connect refuses files with an ID it has already seen. Bumping the ID lets you upload the cleaned result even if you previously uploaded the original."
     },
     "modes": {
-      "pin": "Pin",
-      "pin_help": "Snap every point to one spot. Best when you actually stopped here.",
-      "smooth": "Smooth",
-      "smooth_help": "Replace the wandering with a straight line from start to end. Best when you were slowly moving.",
+      "pin": "Stood still",
+      "pin_help": "Snap every point to one spot (the centroid). Best when you really didn't move — paused, fixing gear, waiting for a friend.",
+      "smooth": "Back & forth",
+      "smooth_help": "Replace the wander with a triangle: start → farthest excursion → end. Best when you actually walked off somewhere and came back.",
       "keep": "Keep",
       "keep_help": "Don't change this cluster. Use when the GPS is actually right."
     },

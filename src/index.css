@@ -43,3 +43,4 @@
   box-shadow: 0 0 0 2px white;
 }
 .marker-num.selected { background: #14b8a6; }
+.marker-num.smooth { background: #f97316; }

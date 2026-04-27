@@ -63,6 +63,10 @@ export default function CleanView({ file, onBack }: Props) {
 
   const setMode = (clusterIdx: number, mode: Resolution) => {
     setResolutions(prev => ({ ...prev, [clusterIdx + 1]: mode }))
+    // Re-trigger focus so the map zooms in to show what changing the mode did,
+    // even if the user is staying on the same cluster.
+    setFocus(undefined)
+    requestAnimationFrame(() => setFocus(clusterIdx))
   }
 
   const setAllModes = (mode: Resolution) => {
@@ -76,15 +80,6 @@ export default function CleanView({ file, onBack }: Props) {
     () => previewSavings(clusters, resolutions),
     [clusters, resolutions],
   )
-
-  // For map: which clusters are "selected" (any mode != 'keep')
-  const activeSet = useMemo(() => {
-    const s = new Set<number>()
-    clusters.forEach((_, i) => {
-      if ((resolutions[i + 1] ?? 'keep') !== 'keep') s.add(i)
-    })
-    return s
-  }, [clusters, resolutions])
 
   const toggleFromMap = (i: number) => {
     const cur = resolutions[i + 1] ?? 'keep'
@@ -113,9 +108,9 @@ export default function CleanView({ file, onBack }: Props) {
 
   return (
     <section>
-      <div className="flex items-center mb-4 gap-2">
+      <div className="flex items-center gap-2 sticky top-[60px] z-20 -mx-4 px-4 py-2 mb-4 bg-slate-950/95 backdrop-blur lg:static lg:mx-0 lg:px-0 lg:py-0 lg:bg-transparent lg:backdrop-blur-none">
         <button className="btn-ghost" onClick={onBack}>← {t('clean.back')}</button>
-        <h2 className="text-2xl">{t('clean.title')}</h2>
+        <h2 className="text-xl lg:text-2xl">{t('clean.title')}</h2>
       </div>
 
       {error && <p className="text-red-400">⚠️ {error}</p>}
@@ -123,11 +118,11 @@ export default function CleanView({ file, onBack }: Props) {
 
       {!scanning && !error && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 lg:sticky lg:top-4 lg:self-start">
             <JitterMap
               records={records}
               clusters={clusters}
-              selected={activeSet}
+              resolutions={resolutions}
               onToggle={toggleFromMap}
               focusOn={focus}
             />
@@ -190,7 +185,9 @@ export default function CleanView({ file, onBack }: Props) {
                   return (
                     <li key={i} className="bg-slate-800/40 rounded-lg p-2">
                       <div className="flex items-center gap-2 mb-2">
-                        <span className={`marker-num ${cur !== 'keep' ? 'selected' : ''}`}
+                        <span className={`marker-num ${
+                          cur === 'pin' ? 'selected' : cur === 'smooth' ? 'smooth' : ''
+                        }`}
                               style={{ width: 22, height: 22, fontSize: 11 }}>
                           {i + 1}
                         </span>
