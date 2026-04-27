@@ -30,6 +30,14 @@ export default function Header() {
             <option value="cs">CS</option>
           </select>
           <a
+            href="https://buymeacoffee.com/kuslesa"
+            target="_blank" rel="noreferrer"
+            className="text-amber-400 hover:text-amber-300 text-sm hidden sm:inline-flex items-center gap-1"
+            title={t('nav.donate')}
+          >
+            ☕ <span className="hidden md:inline">{t('nav.donate')}</span>
+          </a>
+          <a
             href="https://github.com/otaprochazka/fitfix"
             target="_blank" rel="noreferrer"
             className="text-slate-300 hover:text-slate-100 text-sm flex items-center gap-1"

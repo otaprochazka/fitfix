@@ -1,93 +1,145 @@
 /**
- * Snap selected GPS-jitter clusters to their centroid and recompute distances.
- * Operates byte-in-place — every byte not explicitly modified is preserved
- * (including Garmin-proprietary undocumented messages).
+ * Resolve GPS-jitter clusters according to a per-cluster strategy and recompute
+ * downstream distances. Operates byte-in-place — every byte not explicitly
+ * modified is preserved (including Garmin-proprietary undocumented messages).
  *
- * Modifies:
- *   - record.position_lat / position_long (only inside collapsed clusters)
- *   - record.distance                     (recomputed cumulative haversine, all records)
- *   - lap.total_distance / avg_speed       (recomputed from new record distances)
- *   - session.total_distance / avg_speed   (recomputed)
- *   - file_id.time_created / serial_number (so Garmin Connect doesn't dedupe)
+ * Resolution modes per cluster:
+ *   pin    — every point in the cluster snaps to its centroid (best for stops)
+ *   smooth — points are linearly interpolated between the cluster's first and
+ *            last "real" position (best for slow movement with GPS noise)
+ *   keep   — leave the cluster's points untouched
+ *
+ * Modifies on output:
+ *   - record.position_lat / position_long  (only inside resolved clusters)
+ *   - record.distance                       (recomputed cumulative haversine, all records)
+ *   - lap.total_distance / avg_speed        (recomputed)
+ *   - session.total_distance / avg_speed    (recomputed)
+ *   - file_id.time_created / serial_number  (only when freshenFileId, default true)
  */
 
 import {
   walkMessages, readField, writeField, recomputeFileCrc,
   haversine, dateToFitTs, DEG_TO_SC, FIT_EPOCH_S,
 } from './fit'
-import { extractRecords, findClusters, type ClusterOptions } from './findClusters'
+import {
+  extractRecords, findClusters,
+  type ClusterOptions, type JitterCluster, type RecordPoint,
+} from './findClusters'
+
+export type Resolution = 'pin' | 'smooth' | 'keep'
 
 export interface CleanResult {
   output: Uint8Array
   totalClusters: number
-  collapsedNumbers: number[]
-  rawDistanceM: number    // path length before snapping
-  newDistanceM: number    // path length after snapping
+  rawDistanceM: number    // path length before any resolution
+  newDistanceM: number    // path length after resolutions applied
   savedM: number
+  perCluster: { number: number; mode: Resolution; savedM: number }[]
 }
 
 export interface CleanOptions extends ClusterOptions {
-  /** 1-based cluster numbers to KEEP (everything else collapses). */
-  keepNumbers?: number[]
-  /** 1-based cluster numbers to COLLAPSE (alternative to keepNumbers). */
-  collapseNumbers?: number[]
+  /** 1-based cluster number → mode. Missing entries default to `keep`. */
+  resolutions?: Record<number, Resolution>
   /** Bump file_id so Garmin Connect treats it as a new upload. Default true. */
   freshenFileId?: boolean
 }
 
+/** Compute new positions per record under a given per-cluster resolution map. */
+function applyResolutions(
+  records: RecordPoint[],
+  clusters: JitterCluster[],
+  resolutions: Record<number, Resolution>,
+): { lat: number; lon: number }[] {
+  const out = records.map(r => ({ lat: r.lat, lon: r.lon }))
+  for (let ci = 0; ci < clusters.length; ci++) {
+    const mode: Resolution = resolutions[ci + 1] ?? 'keep'
+    if (mode === 'keep') continue
+    const c = clusters[ci]
+    if (mode === 'pin') {
+      for (let k = c.idxStart; k <= c.idxEnd; k++) {
+        out[k] = { ...c.centroid }
+      }
+    } else if (mode === 'smooth') {
+      const a = out[c.idxStart]
+      const b = out[c.idxEnd]
+      const span = c.idxEnd - c.idxStart
+      if (span <= 0) continue
+      for (let k = c.idxStart; k <= c.idxEnd; k++) {
+        const t = (k - c.idxStart) / span
+        out[k] = {
+          lat: a.lat + (b.lat - a.lat) * t,
+          lon: a.lon + (b.lon - a.lon) * t,
+        }
+      }
+    }
+  }
+  return out
+}
+
+/**
+ * Compute saved meters per cluster + total, without rebuilding the file.
+ * Used by the UI to give a real-time preview as the user toggles modes.
+ */
+export function previewSavings(
+  clusters: JitterCluster[],
+  resolutions: Record<number, Resolution>,
+): { totalSavedM: number; perCluster: { number: number; mode: Resolution; savedM: number }[] } {
+  let total = 0
+  const per = clusters.map((c, i) => {
+    const mode: Resolution = resolutions[i + 1] ?? 'keep'
+    let newLen = c.pathLengthM
+    if (mode === 'pin') newLen = 0
+    else if (mode === 'smooth') newLen = haversine(
+      c.points[0].lat, c.points[0].lon,
+      c.points[c.points.length - 1].lat, c.points[c.points.length - 1].lon,
+    )
+    const saved = c.pathLengthM - newLen
+    total += saved
+    return { number: i + 1, mode, savedM: saved }
+  })
+  return { totalSavedM: total, perCluster: per }
+}
+
 export function cleanJitter(input: Uint8Array, opts: CleanOptions = {}): CleanResult {
-  // Work on a copy
   const data = new Uint8Array(input.length)
   data.set(input)
 
   const records = extractRecords(data)
   const clusters = findClusters(records, opts)
+  const resolutions = opts.resolutions ?? {}
 
-  let collapseSet: Set<number>
-  if (opts.collapseNumbers != null) {
-    collapseSet = new Set(opts.collapseNumbers.map(n => n - 1))
-  } else if (opts.keepNumbers != null) {
-    const keep = new Set(opts.keepNumbers.map(n => n - 1))
-    collapseSet = new Set(
-      Array.from({ length: clusters.length }, (_, i) => i).filter(i => !keep.has(i)),
-    )
-  } else {
-    // Default: collapse everything detected
-    collapseSet = new Set(clusters.map((_, i) => i))
-  }
+  const newPositions = applyResolutions(records, clusters, resolutions)
 
-  const snap = new Map<number, { lat: number; lon: number }>()
-  for (const ci of collapseSet) {
-    const c = clusters[ci]
-    for (let k = c.idxStart; k <= c.idxEnd; k++) snap.set(k, c.centroid)
-  }
-
-  // Baseline path length (raw)
+  // Baseline: path length over original positions
   const rawTotal = pathLength(records.map(r => ({ lat: r.lat, lon: r.lon })))
 
-  // Apply snap and recompute cumulative distance
-  const newPositions: { lat: number; lon: number }[] = []
+  // Recompute cumulative distance using new positions
   const newCumDist: number[] = []
   let cum = 0
   let plat: number | null = null
   let plon: number | null = null
   for (let k = 0; k < records.length; k++) {
-    const snapped = snap.get(k)
-    const lat = snapped?.lat ?? records[k].lat
-    const lon = snapped?.lon ?? records[k].lon
+    const { lat, lon } = newPositions[k]
     if (plat != null && plon != null) cum += haversine(plat, plon, lat, lon)
     plat = lat; plon = lon
-    newPositions.push({ lat, lon })
     newCumDist.push(cum)
   }
   const newTotal = cum
 
+  // Determine which records were actually moved (so we only patch lat/lon there)
+  const moved = new Set<number>()
+  for (let ci = 0; ci < clusters.length; ci++) {
+    const mode: Resolution = resolutions[ci + 1] ?? 'keep'
+    if (mode === 'keep') continue
+    const c = clusters[ci]
+    for (let k = c.idxStart; k <= c.idxEnd; k++) moved.add(k)
+  }
+
   // Patch record bytes
   for (let k = 0; k < records.length; k++) {
     const r = records[k]
-    const distRaw = Math.round(newCumDist[k] * 100)  // scale 100, m
-    writeField(data, r.bodyOffset, r.defRef, 5, 'uint32', distRaw)
-    if (snap.has(k)) {
+    writeField(data, r.bodyOffset, r.defRef, 5, 'uint32', Math.round(newCumDist[k] * 100))
+    if (moved.has(k)) {
       const { lat, lon } = newPositions[k]
       const latSc = clampInt32(Math.round(lat * DEG_TO_SC))
       const lonSc = clampInt32(Math.round(lon * DEG_TO_SC))
@@ -96,14 +148,12 @@ export function cleanJitter(input: Uint8Array, opts: CleanOptions = {}): CleanRe
     }
   }
 
-  // Build a sorted index of (timestamp ms → cumulative distance) for lap aggregation
   const tsMs: number[] = records.map(r => r.ts.getTime())
 
-  // Patch laps and session
+  // Patch laps and session aggregates
   for (const m of walkMessages(data)) {
     if (m.kind !== 'data') continue
     if (m.def.globalNum === 19) {
-      // Lap
       const startRaw = readField(data, m.bodyOffset, m.def, 2, 'uint32')
       const endRaw = readField(data, m.bodyOffset, m.def, 253, 'uint32')
       const timerRaw = readField(data, m.bodyOffset, m.def, 8, 'uint32')
@@ -115,23 +165,19 @@ export function cleanJitter(input: Uint8Array, opts: CleanOptions = {}): CleanRe
       const lapDist = Math.max(0, d1 - d0)
       writeField(data, m.bodyOffset, m.def, 9, 'uint32', Math.round(lapDist * 100))
       if (timerRaw != null && timerRaw > 0) {
-        const timerS = timerRaw / 1000
-        const avgSp = lapDist / timerS
+        const avgSp = lapDist / (timerRaw / 1000)
         writeField(data, m.bodyOffset, m.def, 13, 'uint16', Math.round(avgSp * 1000))
       }
     } else if (m.def.globalNum === 18) {
-      // Session
       writeField(data, m.bodyOffset, m.def, 9, 'uint32', Math.round(newTotal * 100))
       const timerRaw = readField(data, m.bodyOffset, m.def, 8, 'uint32')
       if (timerRaw != null && timerRaw > 0) {
-        const timerS = timerRaw / 1000
-        const avgSp = newTotal / timerS
+        const avgSp = newTotal / (timerRaw / 1000)
         writeField(data, m.bodyOffset, m.def, 14, 'uint16', Math.round(avgSp * 1000))
       }
     }
   }
 
-  // Bump file_id
   if (opts.freshenFileId !== false) {
     for (const m of walkMessages(data)) {
       if (m.kind !== 'data' || m.def.globalNum !== 0) continue
@@ -146,13 +192,14 @@ export function cleanJitter(input: Uint8Array, opts: CleanOptions = {}): CleanRe
 
   recomputeFileCrc(data)
 
+  const preview = previewSavings(clusters, resolutions)
   return {
     output: data,
     totalClusters: clusters.length,
-    collapsedNumbers: Array.from(collapseSet, i => i + 1).sort((a, b) => a - b),
     rawDistanceM: rawTotal,
     newDistanceM: newTotal,
     savedM: rawTotal - newTotal,
+    perCluster: preview.perCluster,
   }
 }
 

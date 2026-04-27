@@ -5,17 +5,49 @@
   },
   "nav": {
     "github": "GitHub",
-    "language": "Jazyk"
+    "language": "Jazyk",
+    "donate": "Pošli mi kafe"
   },
   "home": {
     "headline": "Slučování & čištění Garmin .FIT souborů",
-    "subhead": "Slep rozpadlou aktivitu zpátky dohromady. Odstraň GPS motanice z míst, kde ses zastavil. Vše v prohlížeči — soubory neopustí tvoje zařízení.",
+    "subhead": "Slep rozpadlou aktivitu dohromady. Vyčisti GPS motanice z míst, kde ses zastavil. Vše v prohlížeči — soubory neopustí tvoje zařízení.",
     "drop": "Sem přetáhni jeden nebo víc .fit souborů",
     "or": "nebo",
     "browse": "Vyber soubory",
-    "merge_cta": "Sloučit soubory",
-    "clean_cta": "Najít GPS motanice",
-    "two_files_hint": "Přidej 2 soubory ke sloučení. Přidej 1 soubor pro čištění GPS motanic."
+    "merge_cta": "Sloučit",
+    "clean_cta": "Najít motanice",
+    "two_files_hint": "Přidej 2 a více souborů ke sloučení. Přidej 1 soubor pro čištění GPS motanic.",
+    "merge": {
+      "title": "Slučování rozpadlé aktivity",
+      "desc": "Slep 2+ .fit souborů do jedné souvislé aktivity.",
+      "bullet1": "Hodinky umřely uprostřed jízdy? Restart udělal dva soubory? Connect je odmítá spojit?",
+      "bullet2": "Vzdálenost, převýšení, tep, lapy, kalorie — vše zachované a sečtené.",
+      "bullet3": "Výsledek nahraje bez problémů do Connect, Stravy, kamkoliv."
+    },
+    "clean": {
+      "title": "Odstranění GPS motanic",
+      "desc": "Najdi místa, kde hodinky stály, ale GPS to motalo.",
+      "bullet1": "Detekuje každou pauzu, kde ses nehnul, ale GPS lítalo v špagetových smyčkách.",
+      "bullet2": "Pro každou motanici vyber způsob řešení (jeden bod / přímka / nic) — dopad uvidíš okamžitě.",
+      "bullet3": "Přepočítá vzdálenosti lapů i celkové aktivity, ať statistiky nelžou."
+    }
+  },
+  "how": {
+    "title": "Jak to funguje",
+    "step1": {
+      "title": "Přetáhni .fit soubor(y)",
+      "body": "1 soubor → čištění motanic. 2+ souborů → sloučení do jedné aktivity. Vše se čte lokálně, nic se neuploaduje."
+    },
+    "step2": {
+      "title": "Mrkni na mapu",
+      "body": "U čištění: každá detekovaná motanice se zobrazí jako číslovaný pin. Vyber pro každou způsob řešení a uvidíš ušetřené metry v reálném čase."
+    },
+    "step3": {
+      "title": "Stáhni & nahraj",
+      "body": "Výstupní .fit je bit-identický s originálem až na pole, která jsi změnil. Volitelně se pohne file ID, aby to Garmin Connect bral jako nový soubor."
+    },
+    "screenshot_alt": "Ukázka mapy s detekovanými GPS motanicemi",
+    "screenshot_caption": "Číslované červené clustery označují, kde GPS lítala, když ses nehýbal. Vyber, které srovnat."
   },
   "security": {
     "local": {
@@ -46,43 +78,53 @@
       "laps": "Lapy",
       "records": "Body"
     },
+    "options": {
+      "fresh_id": "Připravit pro nahrání do Garmin Connect (nové file ID)",
+      "fresh_id_help": "Garmin Connect odmítá soubory s ID, které už zná. Změnou ID půjde sloučený výsledek nahrát i když jsi předtím nahrál originály."
+    },
     "download": "Stáhnout merged.fit",
     "back": "Začít znovu"
   },
   "clean": {
     "title": "Detekce GPS motanic",
     "scanning": "Skenuji…",
-    "found": "Nalezeno {{n}} motanic",
-    "instruct": "Zaškrtni motanice, které chceš zploštit. Každá se nahradí jedním bodem v centroidu; časy a data ze senzorů zůstanou zachované.",
-    "selected_summary": "Vybráno: {{n}} z {{total}} · odebere {{km}} km falešné vzdálenosti · {{dur}} stání",
+    "found_one": "Nalezena {{n}} motanice",
+    "found_other": "Nalezeno {{n}} motanic",
+    "instruct": "Pro každou motanici vyber způsob řešení. Úspora se přepočítá v reálném čase.",
+    "selected_summary": "Odebere se {{km}} km falešné vzdálenosti ({{m}} m motanice)",
     "options": {
       "title": "Nastavení detekce",
       "radius": "Poloměr (m)",
       "minDuration": "Min. trvání (s)",
       "minPoints": "Min. bodů",
-      "rescan": "Znovu skenovat"
+      "rescan": "Znovu skenovat",
+      "fresh_id": "Připravit pro nahrání do Garmin Connect (nové file ID)",
+      "fresh_id_help": "Garmin Connect odmítá soubory s ID, které už zná. Změnou ID půjde vyčištěný výsledek nahrát i když jsi předtím nahrál originál."
     },
-    "cluster": {
-      "duration": "trvání",
-      "points": "bodů",
-      "excursion": "max odchylka",
-      "path": "nachozeno",
-      "centroid": "centroid"
+    "modes": {
+      "pin": "Bod",
+      "pin_help": "Všechny body se sjednotí na jednom místě. Nejlepší, když ses tam reálně zastavil.",
+      "smooth": "Přímka",
+      "smooth_help": "Nahradí motanici přímkou ze začátku do konce. Nejlepší, když ses pomalu pohyboval.",
+      "keep": "Nechat",
+      "keep_help": "Tuhle motanici neměnit. Použij, když je GPS vlastně v pořádku."
     },
-    "select_all": "Vybrat vše",
-    "select_none": "Zrušit výběr",
+    "saved": "ušetří {{m}} m",
+    "neutral": "beze změny",
+    "set_all": "Nastav vše na:",
     "apply": "Vyčistit & stáhnout",
     "back": "Začít znovu"
   },
   "errors": {
     "not_fit": "{{name}} nevypadá jako platný .FIT soubor.",
-    "merge_needs_two": "Slučování vyžaduje přesně 2 .fit soubory.",
+    "merge_needs_two_plus": "Slučování vyžaduje aspoň 2 .fit soubory.",
     "clean_needs_one": "Čištění vyžaduje přesně 1 .fit soubor."
   },
   "footer": {
     "made_with": "Vyrobeno",
     "by": "od",
     "source": "Zdrojový kód",
-    "issues": "Nahlásit chybu"
+    "issues": "Nahlásit chybu",
+    "donate": "Pošli mi kafe"
   }
 }

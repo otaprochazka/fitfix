@@ -374,3 +374,39 @@ export function mergeFitWithFreshId(file1: Uint8Array, file2: Uint8Array): Merge
   result.output = bumpFileId(result.output)
   return result
 }
+
+/**
+ * Merge N (≥ 2) files. Sorts by detected start time, then chains merges.
+ * Final output gets a fresh file_id when `freshenFileId` is true (default).
+ */
+export function mergeFitMany(files: Uint8Array[], freshenFileId = true): MergeResult {
+  if (files.length < 2)
+    throw new Error('Need at least 2 files to merge')
+
+  // Sort by first record timestamp so chronological order is correct
+  const sorted = [...files].sort((a, b) => firstRecordTs(a) - firstRecordTs(b))
+
+  let acc: Uint8Array = sorted[0]
+  let last: MergeResult | null = null
+  for (let i = 1; i < sorted.length; i++) {
+    last = mergeFit(acc, sorted[i])
+    acc = last.output
+  }
+  return {
+    output: freshenFileId ? bumpFileId(acc) : acc,
+    totalDistanceM: last!.totalDistanceM,
+    totalTimerS: last!.totalTimerS,
+    totalElapsedS: last!.totalElapsedS,
+    numLaps: last!.numLaps,
+    numRecords: last!.numRecords,
+  }
+}
+
+function firstRecordTs(data: Uint8Array): number {
+  for (const m of walkMessages(data)) {
+    if (m.kind !== 'data' || m.def.globalNum !== RECORD) continue
+    const ts = readField(data, m.bodyOffset, m.def, 253, 'uint32')
+    if (ts != null) return ts
+  }
+  return Number.MAX_SAFE_INTEGER
+}

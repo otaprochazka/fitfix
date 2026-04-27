@@ -1,0 +1,162 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="35%" r="75%">
+      <stop offset="0%" stop-color="#3d5a3a"/>
+      <stop offset="60%" stop-color="#1f3520"/>
+      <stop offset="100%" stop-color="#0d1b10"/>
+    </radialGradient>
+    <linearGradient id="cap" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e74c3c"/>
+      <stop offset="100%" stop-color="#a83020"/>
+    </linearGradient>
+    <linearGradient id="stem" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fef9e7"/>
+      <stop offset="100%" stop-color="#e6d9a8"/>
+    </linearGradient>
+    <radialGradient id="cheek" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ff8a8a" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#ff8a8a" stop-opacity="0"/>
+    </radialGradient>
+    <clipPath id="circle">
+      <circle cx="512" cy="512" r="512"/>
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#circle)">
+    <!-- Background -->
+    <rect width="1024" height="1024" fill="url(#bg)"/>
+
+    <!-- Distant tree silhouettes (left) -->
+    <g opacity="0.55" fill="#0a1a0c">
+      <polygon points="40,720 110,420 180,720"/>
+      <polygon points="120,740 200,460 280,740"/>
+      <polygon points="240,760 320,500 400,760"/>
+      <rect x="98" y="700" width="24" height="60"/>
+      <rect x="188" y="720" width="24" height="60"/>
+      <rect x="308" y="740" width="24" height="60"/>
+    </g>
+    <!-- Distant trees (right) -->
+    <g opacity="0.55" fill="#0a1a0c">
+      <polygon points="640,760 720,500 800,760"/>
+      <polygon points="760,740 840,460 920,740"/>
+      <polygon points="860,720 930,420 1000,720"/>
+      <rect x="708" y="740" width="24" height="60"/>
+      <rect x="828" y="720" width="24" height="60"/>
+      <rect x="918" y="700" width="24" height="60"/>
+    </g>
+
+    <!-- Ground / forest floor -->
+    <ellipse cx="512" cy="930" rx="640" ry="120" fill="#1a2818"/>
+    <!-- Grass tufts -->
+    <g fill="#2d4a2a">
+      <path d="M 120 880 Q 130 850 140 880 Q 150 855 160 880 Z"/>
+      <path d="M 260 900 Q 270 870 280 900 Q 290 875 300 900 Z"/>
+      <path d="M 760 895 Q 770 870 780 895 Q 790 870 800 895 Z"/>
+      <path d="M 880 880 Q 890 855 900 880 Q 910 855 920 880 Z"/>
+    </g>
+
+    <!-- Mushroom shadow -->
+    <ellipse cx="512" cy="900" rx="220" ry="28" fill="#000" opacity="0.4"/>
+
+    <!-- Stem -->
+    <path d="M 380 880
+             C 380 720, 400 660, 420 600
+             L 604 600
+             C 624 660, 644 720, 644 880
+             Z"
+          fill="url(#stem)" stroke="#3d2818" stroke-width="6"/>
+
+    <!-- Stem ring (skirt) -->
+    <path d="M 360 670 Q 512 640 664 670 Q 660 700 512 700 Q 364 700 360 670 Z"
+          fill="#fef9e7" stroke="#3d2818" stroke-width="5"/>
+
+    <!-- Cap -->
+    <path d="M 200 540
+             C 200 320, 360 200, 512 200
+             C 664 200, 824 320, 824 540
+             C 824 600, 700 620, 512 620
+             C 324 620, 200 600, 200 540 Z"
+          fill="url(#cap)" stroke="#3d2818" stroke-width="8"/>
+
+    <!-- Cap white spots -->
+    <g fill="#fef9e7" stroke="#3d2818" stroke-width="4">
+      <ellipse cx="320" cy="380" rx="40" ry="35"/>
+      <ellipse cx="430" cy="290" rx="55" ry="46"/>
+      <ellipse cx="600" cy="270" rx="45" ry="38"/>
+      <ellipse cx="720" cy="380" rx="50" ry="42"/>
+      <ellipse cx="540" cy="430" rx="34" ry="28"/>
+      <ellipse cx="270" cy="500" rx="28" ry="22"/>
+      <ellipse cx="780" cy="500" rx="32" ry="26"/>
+    </g>
+
+    <!-- Cheek blush -->
+    <ellipse cx="455" cy="780" rx="40" ry="22" fill="url(#cheek)"/>
+    <ellipse cx="569" cy="780" rx="40" ry="22" fill="url(#cheek)"/>
+
+    <!-- Sunglasses -->
+    <g>
+      <!-- Bridge -->
+      <rect x="488" y="730" width="48" height="10" rx="4" fill="#1a1a1a"/>
+      <!-- Left lens -->
+      <rect x="395" y="715" width="100" height="60" rx="14" fill="#1a1a1a"/>
+      <rect x="404" y="724" width="82" height="42" rx="10" fill="#0f3a3a"/>
+      <!-- Glare on left lens -->
+      <ellipse cx="424" cy="738" rx="14" ry="6" fill="#ffffff" opacity="0.55"/>
+      <!-- Right lens -->
+      <rect x="529" y="715" width="100" height="60" rx="14" fill="#1a1a1a"/>
+      <rect x="538" y="724" width="82" height="42" rx="10" fill="#0f3a3a"/>
+      <!-- Glare on right lens -->
+      <ellipse cx="558" cy="738" rx="14" ry="6" fill="#ffffff" opacity="0.55"/>
+    </g>
+
+    <!-- Smile -->
+    <path d="M 460 815 Q 512 870 564 815"
+          fill="none" stroke="#3d2818" stroke-width="9" stroke-linecap="round"/>
+    <!-- Tongue -->
+    <path d="M 488 845 Q 512 870 536 845 Q 534 858 512 860 Q 490 858 488 845 Z"
+          fill="#ff6b8a" opacity="0.85"/>
+
+    <!-- GPS smartwatch on left side of stem -->
+    <g transform="translate(360 800) rotate(-12)">
+      <!-- Strap top -->
+      <rect x="-14" y="-50" width="32" height="22" rx="4" fill="#0d9488"/>
+      <!-- Strap bottom -->
+      <rect x="-14" y="34" width="32" height="22" rx="4" fill="#0d9488"/>
+      <!-- Watch body -->
+      <rect x="-32" y="-32" width="64" height="64" rx="10" fill="#0f172a" stroke="#2dd4bf" stroke-width="3"/>
+      <!-- Screen -->
+      <rect x="-24" y="-24" width="48" height="48" rx="6" fill="#082f2a"/>
+      <!-- GPS pin icon on screen -->
+      <path d="M 0 -16 C -10 -16 -16 -8 -16 0 C -16 8 0 18 0 18 C 0 18 16 8 16 0 C 16 -8 10 -16 0 -16 Z"
+            fill="#2dd4bf"/>
+      <circle cx="0" cy="0" r="5" fill="#082f2a"/>
+      <!-- Watch crown -->
+      <rect x="33" y="-6" width="6" height="12" rx="2" fill="#2dd4bf"/>
+    </g>
+
+    <!-- Floating GPS satellite signal waves above mushroom -->
+    <g fill="none" stroke="#2dd4bf" stroke-width="4" stroke-linecap="round" opacity="0.85">
+      <path d="M 770 180 Q 800 170 830 180"/>
+      <path d="M 760 160 Q 800 145 840 160"/>
+      <path d="M 750 140 Q 800 120 850 140"/>
+    </g>
+    <circle cx="800" cy="195" r="6" fill="#2dd4bf"/>
+
+    <!-- Tiny firefly sparkles -->
+    <g fill="#fef9e7" opacity="0.85">
+      <circle cx="150" cy="350" r="3"/>
+      <circle cx="180" cy="450" r="2"/>
+      <circle cx="870" cy="320" r="3"/>
+      <circle cx="900" cy="430" r="2"/>
+      <circle cx="100" cy="600" r="2"/>
+      <circle cx="940" cy="600" r="3"/>
+    </g>
+
+    <!-- Subtle vignette -->
+    <radialGradient id="vignette" cx="50%" cy="50%" r="70%">
+      <stop offset="60%" stop-color="#000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000" stop-opacity="0.4"/>
+    </radialGradient>
+    <rect width="1024" height="1024" fill="url(#vignette)"/>
+  </g>
+</svg>

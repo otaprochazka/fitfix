@@ -5,17 +5,49 @@
   },
   "nav": {
     "github": "GitHub",
-    "language": "Language"
+    "language": "Language",
+    "donate": "Buy me a coffee"
   },
   "home": {
     "headline": "Merge & clean Garmin .FIT activity files",
-    "subhead": "Stitch a split activity back together. Remove GPS jitter from break spots. All in your browser — your files never leave your device.",
+    "subhead": "Stitch a split activity back together. Remove GPS jitter from rest stops. All in your browser — your files never leave your device.",
     "drop": "Drop one or more .fit files here",
     "or": "or",
     "browse": "Browse files",
     "merge_cta": "Merge files",
     "clean_cta": "Find GPS jitter",
-    "two_files_hint": "Add 2 files to merge them. Add 1 file to clean GPS jitter."
+    "two_files_hint": "Add 2 or more files to merge them. Add 1 file to clean GPS jitter.",
+    "merge": {
+      "title": "Merge split activities",
+      "desc": "Stitch 2+ .fit files into one continuous activity.",
+      "bullet1": "Watch ran out of battery mid-ride? Restart created two files? Connect refuses to combine them?",
+      "bullet2": "Distance, elevation, heart rate, laps, calories — all preserved and combined.",
+      "bullet3": "Output uploads cleanly to Garmin Connect, Strava, anywhere."
+    },
+    "clean": {
+      "title": "Remove GPS jitter",
+      "desc": "Find spots where the watch sat still but GPS kept wandering.",
+      "bullet1": "Detects every stop where you didn't move but GPS drifted in spaghetti loops.",
+      "bullet2": "Pick a fix per cluster (single point / smooth line / leave alone) — see the impact instantly.",
+      "bullet3": "Recomputes lap and session distances so totals stop lying."
+    }
+  },
+  "how": {
+    "title": "How it works",
+    "step1": {
+      "title": "Drop your .fit file(s)",
+      "body": "1 file → clean GPS jitter. 2 or more files → merge into one activity. Files are read locally; nothing is uploaded."
+    },
+    "step2": {
+      "title": "Review on the map",
+      "body": "For cleaning: every detected jitter cluster shows on the map with a numbered pin. Pick a fix per cluster and see the saved distance update in real time."
+    },
+    "step3": {
+      "title": "Download & upload",
+      "body": "The output .fit is bit-identical to your original except for the fields you changed. Optionally bump the file ID so Garmin Connect treats it as a new upload."
+    },
+    "screenshot_alt": "Screenshot of the GPS jitter cleanup map view",
+    "screenshot_caption": "Numbered red clusters mark where GPS drifted while you stood still. Pick which to flatten."
   },
   "security": {
     "local": {
@@ -36,7 +68,7 @@
     }
   },
   "merge": {
-    "title": "Merge {{n}} files",
+    "title": "Merging {{n}} files",
     "running": "Merging…",
     "success": "Done. Combined activity ready.",
     "summary": {
@@ -46,43 +78,53 @@
       "laps": "Laps",
       "records": "Records"
     },
+    "options": {
+      "fresh_id": "Make file uploadable to Garmin Connect (new file ID)",
+      "fresh_id_help": "Garmin Connect refuses files with an ID it has already seen. Bumping the ID lets you upload the merged result even if you previously uploaded the originals."
+    },
     "download": "Download merged.fit",
     "back": "Start over"
   },
   "clean": {
     "title": "GPS jitter scan",
     "scanning": "Scanning…",
-    "found": "{{n}} jitter clusters detected",
-    "instruct": "Tick the clusters you want to flatten. Each will be replaced by a single point at the centroid; timestamps and sensor data are preserved.",
-    "selected_summary": "Selected: {{n}} of {{total}} · would remove {{km}} km of fake distance · {{dur}} of stops",
+    "found_one": "{{n}} jitter cluster detected",
+    "found_other": "{{n}} jitter clusters detected",
+    "instruct": "Pick a fix mode for each cluster. The savings update in real time.",
+    "selected_summary": "Will remove {{km}} km of fake distance ({{m}} m wandering)",
     "options": {
       "title": "Detection settings",
       "radius": "Radius (m)",
       "minDuration": "Min duration (s)",
       "minPoints": "Min points",
-      "rescan": "Rescan"
+      "rescan": "Rescan",
+      "fresh_id": "Make file uploadable to Garmin Connect (new file ID)",
+      "fresh_id_help": "Garmin Connect refuses files with an ID it has already seen. Bumping the ID lets you upload the cleaned result even if you previously uploaded the original."
     },
-    "cluster": {
-      "duration": "duration",
-      "points": "points",
-      "excursion": "max wander",
-      "path": "walked",
-      "centroid": "centroid"
+    "modes": {
+      "pin": "Pin",
+      "pin_help": "Snap every point to one spot. Best when you actually stopped here.",
+      "smooth": "Smooth",
+      "smooth_help": "Replace the wandering with a straight line from start to end. Best when you were slowly moving.",
+      "keep": "Keep",
+      "keep_help": "Don't change this cluster. Use when the GPS is actually right."
     },
-    "select_all": "Select all",
-    "select_none": "Clear",
+    "saved": "saves {{m}} m",
+    "neutral": "no change",
+    "set_all": "Set all to:",
     "apply": "Clean & download",
     "back": "Start over"
   },
   "errors": {
     "not_fit": "{{name}} doesn't look like a valid .FIT file.",
-    "merge_needs_two": "Merging needs exactly 2 .fit files.",
+    "merge_needs_two_plus": "Merging needs at least 2 .fit files.",
     "clean_needs_one": "Cleaning needs exactly 1 .fit file."
   },
   "footer": {
     "made_with": "Made with",
     "by": "by",
     "source": "Source",
-    "issues": "Report an issue"
+    "issues": "Report an issue",
+    "donate": "Buy me a coffee"
   }
 }

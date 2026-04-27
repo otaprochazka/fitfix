@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import DropZone from './DropZone'
 import SecurityBadges from './SecurityBadges'
+import HowItWorks from './HowItWorks'
 import type { View } from '../App'
 
 interface Props {
@@ -19,8 +20,8 @@ export default function HomeView({ onSelect }: Props) {
   }
 
   const goMerge = () => {
-    if (files.length !== 2) {
-      setError(t('errors.merge_needs_two'))
+    if (files.length < 2) {
+      setError(t('errors.merge_needs_two_plus'))
       return
     }
     onSelect({ kind: 'merge', files })
@@ -39,6 +40,39 @@ export default function HomeView({ onSelect }: Props) {
       <section className="text-center max-w-3xl mx-auto py-8">
         <h1 className="text-4xl md:text-5xl mb-4">{t('home.headline')}</h1>
         <p className="text-slate-400 text-lg leading-relaxed">{t('home.subhead')}</p>
+      </section>
+
+      {/* Two function cards explaining what each does */}
+      <section className="grid md:grid-cols-2 gap-4 mb-6">
+        <div className="card border-slate-700">
+          <div className="flex items-start gap-3 mb-3">
+            <div className="text-3xl" aria-hidden>🧵</div>
+            <div>
+              <h3 className="text-xl text-slate-50 mb-1">{t('home.merge.title')}</h3>
+              <p className="text-sm text-slate-400">{t('home.merge.desc')}</p>
+            </div>
+          </div>
+          <ul className="text-xs text-slate-500 list-disc pl-5 space-y-1">
+            <li>{t('home.merge.bullet1')}</li>
+            <li>{t('home.merge.bullet2')}</li>
+            <li>{t('home.merge.bullet3')}</li>
+          </ul>
+        </div>
+
+        <div className="card border-slate-700">
+          <div className="flex items-start gap-3 mb-3">
+            <div className="text-3xl" aria-hidden>🧹</div>
+            <div>
+              <h3 className="text-xl text-slate-50 mb-1">{t('home.clean.title')}</h3>
+              <p className="text-sm text-slate-400">{t('home.clean.desc')}</p>
+            </div>
+          </div>
+          <ul className="text-xs text-slate-500 list-disc pl-5 space-y-1">
+            <li>{t('home.clean.bullet1')}</li>
+            <li>{t('home.clean.bullet2')}</li>
+            <li>{t('home.clean.bullet3')}</li>
+          </ul>
+        </div>
       </section>
 
       <DropZone onFiles={handleFiles} />
@@ -60,11 +94,11 @@ export default function HomeView({ onSelect }: Props) {
             ))}
           </ul>
           <div className="flex flex-wrap gap-2">
-            <button className="btn-primary" onClick={goMerge} disabled={files.length !== 2}>
-              {t('home.merge_cta')} ({files.length}/2)
+            <button className="btn-primary" onClick={goMerge} disabled={files.length < 2}>
+              🧵 {t('home.merge_cta')} ({files.length})
             </button>
-            <button className="btn-ghost" onClick={goClean} disabled={files.length !== 1}>
-              {t('home.clean_cta')}
+            <button className="btn-primary" onClick={goClean} disabled={files.length !== 1}>
+              🧹 {t('home.clean_cta')}
             </button>
             <button className="btn-ghost ml-auto" onClick={() => { setFiles([]); setError(null) }}>
               ✕ {t('clean.select_none')}
@@ -73,6 +107,8 @@ export default function HomeView({ onSelect }: Props) {
           {error && <p className="text-red-400 text-sm mt-3">{error}</p>}
         </div>
       )}
+
+      <HowItWorks />
 
       <SecurityBadges />
     </>
