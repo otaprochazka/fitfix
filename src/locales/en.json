@@ -8,6 +8,12 @@
     "language": "Language",
     "donate": "Buy me a coffee"
   },
+  "trust": {
+    "local": "100% local — files never leave your device",
+    "open": "Open source (MIT)",
+    "no_ads": "No ads, no tracking",
+    "offline": "Works offline"
+  },
   "home": {
     "headline": "Merge, clean & convert Garmin .FIT files",
     "subhead": "Stitch a split activity back together. Remove GPS jitter from rest stops. Convert FIT to GPX. All in your browser — your files never leave your device.",
@@ -55,7 +61,8 @@
       "body": "The output .fit is bit-identical to your original except for the fields you changed. Optionally bump the file ID so Garmin Connect treats it as a new upload."
     },
     "screenshot_alt": "Screenshot of the GPS jitter cleanup map view",
-    "screenshot_caption": "Numbered red clusters mark where GPS drifted while you stood still. Pick which to flatten."
+    "screenshot_label": "Preview · GPS jitter cleanup",
+    "screenshot_caption": "Numbered clusters mark where GPS drifted while you stood still. Pick which to flatten."
   },
   "security": {
     "local": {
@@ -93,6 +100,7 @@
       "fresh_id_help": "Garmin Connect refuses files with an ID it has already seen. Bumping the ID lets you upload the merged result even if you previously uploaded the originals."
     },
     "download": "Download merged.fit",
+    "also_gpx": "Also as .gpx",
     "back": "Start over"
   },
   "clean": {
@@ -122,7 +130,8 @@
     "saved": "saves {{m}} m",
     "neutral": "no change",
     "set_all": "Set all to:",
-    "apply": "Clean & download",
+    "apply": "Clean & download .fit",
+    "also_gpx": "Also as .gpx",
     "back": "Start over"
   },
   "gpx": {

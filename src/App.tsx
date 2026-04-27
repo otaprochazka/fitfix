@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import Header from './components/Header'
+import TrustBar from './components/TrustBar'
 import Footer from './components/Footer'
 import HomeView from './components/HomeView'
 import MergeView from './components/MergeView'
@@ -18,6 +19,7 @@ export default function App() {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
+      <TrustBar />
       <main className="flex-1 max-w-6xl mx-auto w-full px-4 py-6">
         {view.kind === 'home' && <HomeView onSelect={setView} />}
         {view.kind === 'merge' && (
