@@ -12,7 +12,9 @@ export default function Footer() {
         <span className="hidden sm:inline">·</span>
         <a href="https://github.com/otaprochazka/fitfix">{t('footer.source')}</a>
         <span className="hidden sm:inline">·</span>
-        <a href="https://github.com/otaprochazka/fitfix/issues">{t('footer.issues')}</a>
+        <a href="https://github.com/otaprochazka/fitfix/issues/new?labels=bug&title=Bug:+">{t('footer.issues')}</a>
+        <span className="hidden sm:inline">·</span>
+        <a href="https://github.com/otaprochazka/fitfix/issues/new?labels=enhancement&title=Feature+request:+">{t('footer.feature_request')}</a>
         <span className="hidden sm:inline">·</span>
         <a
           href="https://buymeacoffee.com/kuslesa"
