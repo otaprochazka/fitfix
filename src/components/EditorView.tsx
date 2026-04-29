@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useActivityStore } from '../state/ActivityStore'
 import TrackPreview, { type StreamKey } from './TrackPreview'
@@ -18,20 +18,29 @@ import { setMergeSeed } from '../lib/edits/merge/seed'
 import {
   subscribeActivityPreview, getActivityPreview, type ActivityPreview,
 } from '../lib/preview'
-import { UndoRedoGroup } from './editor/UndoRedoGroup'
+import type { EditorHistoryState } from '../App'
 
 interface Props {
   file: File
   mergeWith?: File[]
   resumeId?: string
+  /** Land directly on a tool subpage instead of the overview. Used by the
+   *  homepage capability cards to deep-link into a specific tool. */
+  openTool?: string
   onBack: () => void
   onToolChange?: (tool: { id: string; title: string; icon: string } | null) => void
+  /** Surfaces undo/redo state so the parent can render the controls in the
+   *  breadcrumb row instead of giving them a dedicated row in the page body. */
+  onHistoryChange?: (state: EditorHistoryState | null) => void
+  /** Increments when the breadcrumb asks the editor to leave its tool subpage. */
+  clearToolSignal?: number
 }
 
 // Per-tool presentation: icon + i18n description key. Lookup by ManualAction.id.
 const TOOL_META: Record<string, { icon: string; desc: string }> = {
   jitter:    { icon: '📍', desc: 'editor.jitter.panel_desc' },
   loops:     { icon: '🔁', desc: 'editor.loops.panel_body' },
+  zigzag:    { icon: '📍', desc: 'editor.zigzag.panel_desc' },
   merge:     { icon: '🔗', desc: 'editor.merge.panel_desc' },
   trim:      { icon: '✂️', desc: 'editor.tools.trim.desc' },
   spikes:    { icon: '📈', desc: 'editor.tools.spikes.desc' },
@@ -43,14 +52,23 @@ const TOOL_META: Record<string, { icon: string; desc: string }> = {
   track:     { icon: '🛰', desc: 'editor.tools.track.desc' },
 }
 
+// Display order for the tool grid — natural editing flow: pick a region
+// (trim/split), combine files (merge), fix recorded data (zigzag → elevation),
+// then strip metadata. Tools not listed here fall to the end in registry order.
+const TOOL_ORDER = ['trim', 'split', 'merge', 'zigzag', 'elevation', 'strip']
+
 type EditorMode = { kind: 'overview' } | { kind: 'tool'; actionId: string }
 
-export default function EditorView({ file, mergeWith, resumeId, onBack: _onBack, onToolChange }: Props) {
+export default function EditorView({ file, mergeWith, resumeId, openTool, onBack: _onBack, onToolChange, onHistoryChange, clearToolSignal }: Props) {
   const { t } = useTranslation()
   const store = useActivityStore()
   const { activity, error, loading, canUndo, canRedo, undo, redo } = store
   const [mode, setMode] = useState<EditorMode>(
-    mergeWith && mergeWith.length > 0 ? { kind: 'tool', actionId: 'merge' } : { kind: 'overview' }
+    mergeWith && mergeWith.length > 0
+      ? { kind: 'tool', actionId: 'merge' }
+      : openTool
+        ? { kind: 'tool', actionId: openTool }
+        : { kind: 'overview' }
   )
 
   useEffect(() => {
@@ -83,6 +101,20 @@ export default function EditorView({ file, mergeWith, resumeId, onBack: _onBack,
   const enterTool = (actionId: string) => setMode({ kind: 'tool', actionId })
   const exitTool = () => setMode({ kind: 'overview' })
 
+  // When the breadcrumb's filename crumb is clicked, App bumps clearToolSignal.
+  // Drop back to the overview so the tool body actually unmounts in sync with
+  // the crumb disappearing — without this, the tool stays rendered while the
+  // breadcrumb pretends we already left.
+  //
+  // Ref-tracked skip on mount: the effect fires once with the initial value,
+  // and we don't want that to nuke a `mergeWith`-seeded `mode='tool'` start.
+  const lastClearSignalRef = useRef(clearToolSignal)
+  useEffect(() => {
+    if (lastClearSignalRef.current === clearToolSignal) return
+    lastClearSignalRef.current = clearToolSignal
+    setMode(m => (m.kind === 'tool' ? { kind: 'overview' } : m))
+  }, [clearToolSignal])
+
   const actions = useMemo<ManualAction[]>(() => {
     if (!activity) return []
     return getManualActions().filter(a => !a.applicable || a.applicable(activity))
@@ -103,17 +135,16 @@ export default function EditorView({ file, mergeWith, resumeId, onBack: _onBack,
     return () => onToolChange(null)
   }, [mode, actions, onToolChange, t])
 
+  // Publish undo/redo state to the page chrome so the breadcrumb row can host
+  // the controls — keeps a whole row off the editor body.
+  useEffect(() => {
+    if (!onHistoryChange) return
+    onHistoryChange({ canUndo, canRedo, onUndo: undo, onRedo: redo })
+    return () => onHistoryChange(null)
+  }, [canUndo, canRedo, undo, redo, onHistoryChange])
+
   return (
     <section data-testid="editor-root">
-      <div className="flex items-center justify-end mb-3">
-        <UndoRedoGroup
-          canUndo={canUndo}
-          canRedo={canRedo}
-          onUndo={undo}
-          onRedo={redo}
-        />
-      </div>
-
       {error && <div data-testid="editor-error" className="card border-red-700 mb-4 text-red-300">{error}</div>}
       {!activity && !error && <div className="card text-slate-400">{t('editor.loading')}</div>}
 
@@ -318,25 +349,36 @@ function ToolSubpage({
 
   return (
     <div className="flex flex-col gap-3">
+      {/* Top: collapsible global Activity summary (shows preview diff). The
+          summary and timeline below it both default folded on every tool-
+          open — `persist={false}` opts out of localStorage, and `key`
+          forces a remount when the user switches between tools so the new
+          tool starts from the same folded baseline. */}
       <CollapsibleSummary
+        key={`summary-${action.id}`}
         activity={activity}
         previewActivity={preview?.activity ?? null}
         secondary={preview?.secondary ?? null}
+        persist={false}
       />
       <ActivityTimeline
+        key={`timeline-${action.id}`}
         activity={activity}
         previewActivity={preview?.activity ?? null}
         cursorIdx={cursorIdx}
         onCursor={setCursorIdx}
         mapStream={isIndoor ? null : mapStream}
         onMapStream={isIndoor ? undefined : setMapStream}
+        marker={preview?.marker ?? null}
+        persist={false}
       />
       {action.ownsMap ? (
-        // Map-owning tools (jitter, loops) draw their own map on top of the
-        // base activity. They get the full remaining height.
-        <div className="card overflow-y-auto h-[clamp(420px,70vh,800px)]">
-          <Panel activity={activity} onApply={onApply} />
-        </div>
+        // Map-owning tools (jitter, loops) draw their own map AND own their
+        // own height/scroll behavior (e.g. JitterMap uses
+        // `lg:h-[calc(100vh-160px)]`). Wrapping them in an extra scroll
+        // container double-clips Leaflet's viewport and breaks zoom hit-
+        // testing — render the panel directly.
+        <Panel activity={activity} onApply={onApply} />
       ) : (
         // Standard layout: panel sits as a full-width band on top of the map
         // so users see all controls without scanning a side column. The map
@@ -532,10 +574,11 @@ function useSummaryStats(activity: NormalizedActivity, previewActivity: Normaliz
       return { previewValue: format(next), delta: signedFmt(next - cur) }
     }
 
-    // Always render the same 14 cells — fall back to "—" when a stream is
-    // missing so the grid stays balanced and the user sees explicitly which
-    // signals are absent from the file.
-    const stats: StatCell[] = [
+    // Build the full cell list, then drop cells whose stream is missing
+    // (value '—') so the grid only shows signals that actually exist in the
+    // file. A cell with a meaningful preview value is kept even if the
+    // current value is empty, so a tool's "what would change" still surfaces.
+    const allStats: StatCell[] = [
       {
         key: 'start', icon: '🟢', label: t('editor.summary.start'),
         value: fmtTs(a.startTs, lang),
@@ -633,6 +676,8 @@ function useSummaryStats(activity: NormalizedActivity, previewActivity: Normaliz
       },
     ]
 
+    const stats: StatCell[] = allStats.filter(s => s.value !== '—' || s.previewValue)
+
     const inline = [
       a.distanceKm != null ? `${a.distanceKm.toFixed(2)} km` : null,
       a.elapsedSec != null ? formatDuration(a.elapsedSec) : null,
@@ -671,29 +716,37 @@ function StatGrid({ stats }: { stats: StatCell[] }) {
   )
 }
 
-function CollapsibleSummary({
-  activity, previewActivity, secondary,
+// Exported for the regression test in tests/dom/activity-summary-fold.test.tsx
+// — pins that the user can collapse the card even when a tool publishes a
+// preview diff. Not part of the public component API.
+export function CollapsibleSummary({
+  activity, previewActivity, secondary, persist = true,
 }: {
   activity: NormalizedActivity
   previewActivity?: NormalizedActivity | null
   /** Optional second activity (split tool) — rendered as a sibling box so
    * the user sees stats for both halves of the would-be split. */
   secondary?: { activity: NormalizedActivity; label?: string; color?: string } | null
+  /** When false, the expand state is per-mount only (no localStorage), so
+   * the card always reopens collapsed on the next mount. Used by
+   * ToolSubpage so every tool-open starts from a clean folded view. */
+  persist?: boolean
 }) {
   const { t } = useTranslation()
-  const [expanded, setExpanded] = useLocalBool('fitfix.collapse.summary', false)
+  const persisted = useLocalBool('fitfix.collapse.summary', false)
+  const transient = useState(false)
+  const [expanded, setExpanded] = persist ? persisted : transient
   const { stats, inline } = useSummaryStats(activity, previewActivity ?? null)
   const hasDiff = stats.some(s => s.previewValue)
-  // Auto-expand when a tool publishes a preview so the diff is visible without
-  // the user having to click open the summary.
-  const showStats = expanded || hasDiff || !!secondary
+  const showStats = expanded
 
   // When split (or any future "two-output" tool) publishes a secondary
-  // activity, render two cards side-by-side so each half's stats are equal
-  // in weight; the primary still shows the diff against the working file.
+  // activity, render the two cards as collapsed rows so the user can pop
+  // either half open to compare stats. Both default folded; each carries
+  // a color swatch matching its track on the map.
   if (secondary) {
     return (
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+      <div className="flex flex-col gap-2">
         <SummaryBox
           title={t('editor.summary.title')}
           stats={stats}
@@ -701,6 +754,7 @@ function CollapsibleSummary({
           showStats={showStats}
           onToggle={() => setExpanded(!expanded)}
           badge={hasDiff ? t('editor.summary.preview_badge') : undefined}
+          color="#2dd4bf"
         />
         <SecondarySummaryBox
           title={secondary.label ?? t('editor.summary.title_secondary')}
@@ -724,7 +778,7 @@ function CollapsibleSummary({
 }
 
 function SummaryBox({
-  title, stats, inline, showStats, onToggle, badge,
+  title, stats, inline, showStats, onToggle, badge, color,
 }: {
   title: string
   stats: StatCell[]
@@ -732,9 +786,13 @@ function SummaryBox({
   showStats: boolean
   onToggle: () => void
   badge?: string
+  color?: string
 }) {
   return (
-    <div className="card p-0 overflow-hidden">
+    <div
+      className={`card p-0 overflow-hidden${color ? ' border-l-2' : ''}`}
+      style={color ? { borderLeftColor: color } : undefined}
+    >
       <button
         type="button"
         onClick={onToggle}
@@ -746,9 +804,17 @@ function SummaryBox({
           style={{ transform: showStats ? 'rotate(90deg)' : 'rotate(0deg)' }}
           aria-hidden
         >▶</span>
+        {color && (
+          <span aria-hidden className="shrink-0 leading-none" style={{ color }}>●</span>
+        )}
         <span className="text-sm text-slate-200 font-medium shrink-0">{title}</span>
         {badge && (
-          <span className="text-[10px] uppercase tracking-wide text-amber-300/90 shrink-0 font-semibold">
+          <span
+            className="text-[10px] uppercase tracking-wide shrink-0 font-semibold rounded px-1.5 py-0.5"
+            style={color
+              ? { color, backgroundColor: `${color}1f`, border: `1px solid ${color}66` }
+              : { color: '#fcd34d' }}
+          >
             {badge}
           </span>
         )}
@@ -772,18 +838,19 @@ function SecondarySummaryBox({
   activity: NormalizedActivity
   color?: string
 }) {
-  const { stats } = useSummaryStats(activity)
+  const { t } = useTranslation()
+  const [expanded, setExpanded] = useState(false)
+  const { stats, inline } = useSummaryStats(activity)
   return (
-    <div className="card p-0 overflow-hidden border-l-2"
-         style={color ? { borderLeftColor: color } : undefined}>
-      <div className="flex items-center gap-2 px-4 py-2.5">
-        {color && <span aria-hidden style={{ color }}>●</span>}
-        <span className="text-sm text-slate-200 font-medium">{title}</span>
-      </div>
-      <div className="px-4 pb-4">
-        <StatGrid stats={stats} />
-      </div>
-    </div>
+    <SummaryBox
+      title={title}
+      stats={stats}
+      inline={inline}
+      showStats={expanded}
+      onToggle={() => setExpanded(!expanded)}
+      color={color}
+      badge={t('editor.summary.new_badge', 'New activity')}
+    />
   )
 }
 
@@ -950,15 +1017,17 @@ function ToolGrid({
 }) {
   const { t } = useTranslation()
 
-  const grouped = useMemo(() => {
-    const groups = new Map<string, ManualAction[]>()
-    for (const a of actions) {
-      const key = a.group ?? 'Tools'
-      const list = groups.get(key) ?? []
-      list.push(a)
-      groups.set(key, list)
-    }
-    return Array.from(groups.entries())
+  // With ~6 tools left after pruning, per-group headings ("GPS", "Combine",
+  // "trim", "Tools") just create single-item sections that add visual noise.
+  // Render a flat grid in a deliberate edit-flow order; unknown ids fall to
+  // the end so newly added tools still render without a code change here.
+  const ordered = useMemo(() => {
+    const rank = new Map(TOOL_ORDER.map((id, i) => [id, i]))
+    return [...actions].sort((a, b) => {
+      const ra = rank.get(a.id) ?? Number.MAX_SAFE_INTEGER
+      const rb = rank.get(b.id) ?? Number.MAX_SAFE_INTEGER
+      return ra - rb
+    })
   }, [actions])
 
   if (actions.length === 0) {
@@ -976,37 +1045,30 @@ function ToolGrid({
         <h3 className="text-base text-slate-200 font-semibold">{t('editor.manual.title')}</h3>
         <span className="text-xs text-slate-500">{t('editor.manual.count', { n: actions.length })}</span>
       </div>
-      <div className="space-y-5">
-        {grouped.map(([group, list]) => (
-          <div key={group}>
-            <div className="text-xs uppercase tracking-wide text-slate-500 mb-2">{group}</div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-              {list.map(a => {
-                const meta = TOOL_META[a.id] ?? { icon: '🛠', desc: '' }
-                return (
-                  <button
-                    key={a.id}
-                    onClick={() => onPickTool(a.id)}
-                    className="text-left bg-slate-800/40 hover:bg-slate-800/70 hover:border-brand-500/40 border border-slate-800 rounded-lg p-3 transition-colors group flex gap-3 items-start"
-                  >
-                    <span className="text-2xl leading-none mt-0.5 shrink-0" aria-hidden>{meta.icon}</span>
-                    <span className="flex-1 min-w-0">
-                      <span className="block text-slate-100 text-sm font-medium group-hover:text-brand-300">
-                        {t(a.titleKey)}
-                      </span>
-                      {meta.desc && (
-                        <span className="block text-xs text-slate-400 mt-0.5 line-clamp-2">
-                          {t(meta.desc)}
-                        </span>
-                      )}
-                    </span>
-                    <span className="text-slate-600 group-hover:text-brand-400 mt-0.5" aria-hidden>→</span>
-                  </button>
-                )
-              })}
-            </div>
-          </div>
-        ))}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+        {ordered.map(a => {
+          const meta = TOOL_META[a.id] ?? { icon: '🛠', desc: '' }
+          return (
+            <button
+              key={a.id}
+              onClick={() => onPickTool(a.id)}
+              className="text-left bg-slate-800/40 hover:bg-slate-800/70 hover:border-brand-500/40 border border-slate-800 rounded-lg p-3 transition-colors group flex gap-3 items-start"
+            >
+              <span className="text-2xl leading-none mt-0.5 shrink-0" aria-hidden>{meta.icon}</span>
+              <span className="flex-1 min-w-0">
+                <span className="block text-slate-100 text-sm font-medium group-hover:text-brand-300">
+                  {t(a.titleKey)}
+                </span>
+                {meta.desc && (
+                  <span className="block text-xs text-slate-400 mt-0.5 line-clamp-2">
+                    {t(meta.desc)}
+                  </span>
+                )}
+              </span>
+              <span className="text-slate-600 group-hover:text-brand-400 mt-0.5" aria-hidden>→</span>
+            </button>
+          )
+        })}
       </div>
     </div>
   )

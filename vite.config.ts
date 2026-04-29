@@ -25,32 +25,45 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,ico,webmanifest}'],
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/(.+)\.basemaps\.cartocdn\.com\/.*/,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'cartodb-tiles',
-              expiration: { maxEntries: 1500, maxAgeSeconds: 60 * 60 * 24 * 30 },
+        runtimeCaching: (() => {
+          const tileFallback = {
+            plugins: [
+              {
+                handlerDidError: async () =>
+                  new Response('', { status: 504, statusText: 'Tile unavailable' }),
+              },
+            ],
+          }
+          return [
+            {
+              urlPattern: /^https:\/\/(.+)\.basemaps\.cartocdn\.com\/.*/,
+              handler: 'CacheFirst' as const,
+              options: {
+                cacheName: 'cartodb-tiles',
+                expiration: { maxEntries: 1500, maxAgeSeconds: 60 * 60 * 24 * 30 },
+                ...tileFallback,
+              },
             },
-          },
-          {
-            urlPattern: /^https:\/\/(.+)\.tile\.opentopomap\.org\/.*/,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'topo-tiles',
-              expiration: { maxEntries: 1500, maxAgeSeconds: 60 * 60 * 24 * 30 },
+            {
+              urlPattern: /^https:\/\/(.+)\.tile\.opentopomap\.org\/.*/,
+              handler: 'CacheFirst' as const,
+              options: {
+                cacheName: 'topo-tiles',
+                expiration: { maxEntries: 1500, maxAgeSeconds: 60 * 60 * 24 * 30 },
+                ...tileFallback,
+              },
             },
-          },
-          {
-            urlPattern: /^https:\/\/server\.arcgisonline\.com\/.*/,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'esri-tiles',
-              expiration: { maxEntries: 1500, maxAgeSeconds: 60 * 60 * 24 * 30 },
+            {
+              urlPattern: /^https:\/\/server\.arcgisonline\.com\/.*/,
+              handler: 'CacheFirst' as const,
+              options: {
+                cacheName: 'esri-tiles',
+                expiration: { maxEntries: 1500, maxAgeSeconds: 60 * 60 * 24 * 30 },
+                ...tileFallback,
+              },
             },
-          },
-        ],
+          ]
+        })(),
       },
     }),
   ],

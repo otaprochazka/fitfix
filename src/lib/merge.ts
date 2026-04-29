@@ -520,9 +520,106 @@ export function firstRecordTs(data: Uint8Array): number {
   return Number.MAX_SAFE_INTEGER
 }
 
+/** Read the last record's timestamp from a FIT file, in FIT-epoch seconds. */
+export function lastRecordTs(data: Uint8Array): number {
+  let last = -1
+  for (const m of walkMessages(data)) {
+    if (m.kind !== 'data' || m.def.globalNum !== RECORD) continue
+    const ts = readField(data, m.bodyOffset, m.def, 253, 'uint32')
+    if (ts != null && ts > last) last = ts
+  }
+  return last
+}
+
 /** Sort items chronologically by the first-record timestamp of their bytes. */
 export function sortByStartTime<T>(items: T[], getBytes: (item: T) => Uint8Array): T[] {
   const tagged = items.map(item => ({ item, ts: firstRecordTs(getBytes(item)) }))
   tagged.sort((a, b) => a.ts - b.ts)
   return tagged.map(t => t.item)
+}
+
+// ----- Pre-merge validation --------------------------------------------
+
+export type MergeIssue =
+  | { kind: 'invalid'; fileName: string; reason: string }
+  | { kind: 'no-records'; fileName: string }
+  | {
+      kind: 'overlap'
+      aName: string
+      bName: string
+      aStart: Date
+      aEnd: Date
+      bStart: Date
+      bEnd: Date
+      overlapSeconds: number
+    }
+
+export interface MergeFileInput {
+  name: string
+  bytes: Uint8Array
+}
+
+interface FileSpan {
+  name: string
+  startTs: number
+  endTs: number
+}
+
+/**
+ * Inspect each file for parseability + a usable record range, and flag any
+ * pair of files whose record-time ranges overlap. Files with no time data are
+ * skipped from overlap detection but reported as "no-records".
+ *
+ * Returns issues in evaluation order. An empty array means it's safe to merge.
+ */
+export function validateMergeFiles(files: MergeFileInput[]): MergeIssue[] {
+  const issues: MergeIssue[] = []
+  const spans: FileSpan[] = []
+
+  for (const f of files) {
+    let startTs: number | null = null
+    let endTs: number | null = null
+    try {
+      parseHeader(f.bytes)
+      const first = firstRecordTs(f.bytes)
+      const last = lastRecordTs(f.bytes)
+      if (first !== Number.MAX_SAFE_INTEGER) startTs = first
+      if (last >= 0) endTs = last
+    } catch (e) {
+      issues.push({
+        kind: 'invalid',
+        fileName: f.name,
+        reason: (e as Error).message || 'Could not parse file',
+      })
+      continue
+    }
+    if (startTs == null || endTs == null) {
+      issues.push({ kind: 'no-records', fileName: f.name })
+      continue
+    }
+    spans.push({ name: f.name, startTs, endTs })
+  }
+
+  // O(n²) is fine — merge UI caps out at a handful of files.
+  for (let i = 0; i < spans.length; i++) {
+    for (let j = i + 1; j < spans.length; j++) {
+      const a = spans[i]
+      const b = spans[j]
+      const overlap = Math.min(a.endTs, b.endTs) - Math.max(a.startTs, b.startTs)
+      if (overlap > 0) {
+        issues.push({
+          kind: 'overlap',
+          aName: a.name,
+          bName: b.name,
+          aStart: new Date((FIT_EPOCH_S + a.startTs) * 1000),
+          aEnd: new Date((FIT_EPOCH_S + a.endTs) * 1000),
+          bStart: new Date((FIT_EPOCH_S + b.startTs) * 1000),
+          bEnd: new Date((FIT_EPOCH_S + b.endTs) * 1000),
+          overlapSeconds: overlap,
+        })
+      }
+    }
+  }
+
+  return issues
 }

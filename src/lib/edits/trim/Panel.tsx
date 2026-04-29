@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next'
 import type { ManualActionPanelProps } from '../../plugins/types'
 import { trimToRange } from '../../rewrite'
 import { parseActivity } from '../../activity'
+import HelpButton from '../../../components/HelpButton'
 import { usePreview } from '../../usePreview'
 
 const MAX_OFFSET_MIN = 60
@@ -97,17 +98,14 @@ export function TrimPanel({ activity, onApply }: ManualActionPanelProps) {
 
   return (
     <div className="space-y-4">
-      {/* What this tool does */}
-      <div className="rounded-md border border-slate-700/60 bg-slate-800/40 px-3 py-2 text-xs text-slate-300 leading-relaxed">
-        <p className="font-medium text-slate-100 mb-1">
-          {t('editor.trim.explain_title', 'What "Trim" does')}
-        </p>
-        <p>
-          {t(
+      <div className="flex justify-end">
+        <HelpButton
+          title={t('editor.trim.explain_title', 'What "Trim" does')}
+          body={t(
             'editor.trim.explain_body',
             'Cuts records from the start and/or end of the activity. Useful when you forgot to stop the watch (drove home with it on) or it auto-started in the parking lot. The middle of the activity is untouched; lap markers inside the kept window are preserved.',
           )}
-        </p>
+        />
       </div>
 
       {/* Current bounds */}

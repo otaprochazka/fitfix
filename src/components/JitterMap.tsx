@@ -176,7 +176,7 @@ export default function JitterMap({ records, clusters, resolutions, onToggle, fo
   return (
     <div
       ref={mapEl}
-      className="w-full h-[60vh] lg:h-[calc(100vh-160px)] rounded-xl overflow-hidden border border-slate-800"
+      className="w-full h-[60vh] lg:h-[clamp(400px,calc(100vh-560px),620px)] rounded-xl overflow-hidden border border-slate-800"
     />
   )
 }

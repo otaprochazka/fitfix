@@ -6,6 +6,7 @@ import { parseActivity } from '../../activity'
 import { mergeFitMany, firstRecordTs } from '../../merge'
 import { consumeMergeSeed } from './seed'
 import { setActivityPreview } from '../../preview'
+import HelpButton from '../../../components/HelpButton'
 
 const PREVIEW_COLOR = '#f97316' // orange-500 — contrasts with the teal-300 base track
 
@@ -153,19 +154,16 @@ export function MergePanel({ activity, onApply }: ManualActionPanelProps) {
 
   return (
     <div className="space-y-3">
-      {/* What this tool does */}
-      <div className="rounded-md border border-slate-700/60 bg-slate-800/40 px-3 py-2 text-xs text-slate-300 leading-relaxed">
-        <p className="font-medium text-slate-100 mb-1">
-          {t('editor.merge.explain_title', 'What "Merge" does')}
-        </p>
-        <p>
-          {t(
+      <div className="flex items-center gap-2">
+        <p className="text-sm text-slate-400 flex-1">{t('editor.merge.panel_desc')}</p>
+        <HelpButton
+          title={t('editor.merge.explain_title', 'What "Merge" does')}
+          body={t(
             'editor.merge.explain_body',
             'Stitches another .fit onto this activity. Files are auto-ordered by their first record timestamp; lap markers, HR, power and GPS are preserved from both. The summary, timeline and map below preview the combined result before you commit.',
           )}
-        </p>
+        />
       </div>
-      <p className="text-sm text-slate-400">{t('editor.merge.panel_desc')}</p>
 
       {!pending && (
         <label

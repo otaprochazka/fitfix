@@ -17,6 +17,13 @@ interface Props {
   /** Set the map-color stream (null clears it). Omit when there is no map
    * (indoor activities) — the "Color map by" selector row is then hidden. */
   onMapStream?: (s: StreamKey | null) => void
+  /** When false, the expand state is per-mount only (no localStorage), so
+   * the timeline always reopens collapsed on the next mount. ToolSubpage
+   * uses this so every tool-open starts from a clean folded view. */
+  persist?: boolean
+  /** Optional vertical separator on the chart at this timestamp — Split
+   * uses it to mark the cut point so the user reads cut against streams. */
+  marker?: { ts: Date; color?: string; label?: string } | null
 }
 
 function formatVal(s: StreamKey, v: number): string {
@@ -44,12 +51,14 @@ const PAD_T = 6
 const PAD_B = 22
 
 export default function ActivityTimeline({
-  activity, previewActivity, cursorIdx, onCursor, mapStream, onMapStream,
+  activity, previewActivity, cursorIdx, onCursor, mapStream, onMapStream, persist = true, marker,
 }: Props) {
   const { t } = useTranslation()
   const total = activity.points.length
   const [range, setRange] = useState<[number, number]>([0, Math.max(0, total - 1)])
-  const [expanded, setExpanded] = useLocalBool('fitfix.collapse.timeline', false)
+  const persisted = useLocalBool('fitfix.collapse.timeline', false)
+  const transient = useState(false)
+  const [expanded, setExpanded] = persist ? persisted : transient
   const [hidden, setHidden] = useState<Set<StreamKey>>(new Set())
   const svgRef = useRef<SVGSVGElement>(null)
   const panRef = useRef<{ startX: number; startRange: [number, number] } | null>(null)
@@ -444,6 +453,36 @@ export default function ActivityTimeline({
                 vectorEffect="non-scaling-stroke"
               />
             )}
+            {marker && marker.ts && (() => {
+              const mts = marker.ts.getTime()
+              if (mts < tsMin || mts > tsMax) return null
+              const x = xFromTs(mts)
+              const stroke = marker.color ?? 'rgb(244,114,22)'
+              return (
+                <g>
+                  <line
+                    x1={x}
+                    x2={x}
+                    y1={PAD_T}
+                    y2={H - PAD_B}
+                    stroke={stroke}
+                    strokeWidth={1.5}
+                    vectorEffect="non-scaling-stroke"
+                  />
+                  {marker.label && (
+                    <text
+                      x={x + 4}
+                      y={PAD_T + 11}
+                      fill={stroke}
+                      fontSize={11}
+                      fontFamily="ui-monospace,monospace"
+                    >
+                      {marker.label}
+                    </text>
+                  )}
+                </g>
+              )
+            })()}
             {cursorX != null && (
               <line
                 x1={cursorX}

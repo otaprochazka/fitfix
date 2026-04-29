@@ -14,6 +14,7 @@ import type { ManualActionPanelProps } from '../../plugins/types'
 import { scanFitForClusters } from '../../findClusters'
 import { cleanJitter, previewSavings, type Resolution } from '../../cleanJitter'
 import JitterMap from '../../../components/JitterMap'
+import HelpButton from '../../../components/HelpButton'
 import { parseActivity } from '../../activity'
 import { usePreview } from '../../usePreview'
 
@@ -115,24 +116,22 @@ export function JitterPanel({ activity, onApply }: ManualActionPanelProps) {
 
   return (
     <div className="space-y-3">
-      {/* What this tool does */}
-      <div className="rounded-md border border-slate-700/60 bg-slate-800/40 px-3 py-2 text-xs text-slate-300 leading-relaxed space-y-1">
-        <p className="font-medium text-slate-100">
-          {t('editor.jitter.explain_title', 'What "GPS jitter" does')}
-        </p>
-        <p>
-          {t(
-            'editor.jitter.explain_body',
-            'When the watch sits still (red light, café, transition), the GPS keeps wandering by metres. The result: phantom distance, jagged map, polluted pace. Each highlighted cluster on the map is one of these stationary periods — pick how to resolve it:',
-          )}
-        </p>
-        <ul className="ml-4 list-disc space-y-0.5 text-slate-400">
-          <li>{t('editor.jitter.explain_pin',    '📍 Pin — collapse all jitter points to the centroid (cleanest map, removes phantom distance).')}</li>
-          <li>{t('editor.jitter.explain_smooth', '↘ Smooth — replace the wander with a 3-point triangle (preserves a visible "stop" on the map).')}</li>
-          <li>{t('editor.jitter.explain_keep',   '⊝ Keep — leave the cluster untouched.')}</li>
-        </ul>
+      <div className="flex items-center gap-2">
+        <p className="text-sm text-slate-400 flex-1">{t('editor.jitter.panel_desc')}</p>
+        <HelpButton
+          title={t('editor.jitter.explain_title', 'What "GPS jitter" does')}
+          body={[
+            t(
+              'editor.jitter.explain_body',
+              'When the watch sits still (red light, café, transition), the GPS keeps wandering by metres. The result: phantom distance, jagged map, polluted pace. Each highlighted cluster on the map is one of these stationary periods — pick how to resolve it:',
+            ),
+            '',
+            t('editor.jitter.explain_pin',    '📍 Pin — collapse all jitter points to the centroid (cleanest map, removes phantom distance).'),
+            t('editor.jitter.explain_smooth', '↘ Smooth — replace the wander with a 3-point triangle (preserves a visible "stop" on the map).'),
+            t('editor.jitter.explain_keep',   '⊝ Keep — leave the cluster untouched.'),
+          ].join('\n')}
+        />
       </div>
-      <p className="text-sm text-slate-400">{t('editor.jitter.panel_desc')}</p>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
         <div className="lg:col-span-2">
           <JitterMap

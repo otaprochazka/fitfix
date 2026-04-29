@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { mergeFitMany, sortByStartTime, type MergeResult } from '../lib/merge'
+import {
+  mergeFitMany, sortByStartTime, validateMergeFiles,
+  type MergeResult, type MergeIssue,
+} from '../lib/merge'
 import { fitToGpx } from '../lib/fitToGpx'
 import { downloadBlob } from '../lib/download'
 import TrackPreview from './TrackPreview'
@@ -30,6 +33,7 @@ export default function MergeView({ files, onBack: _onBack }: Props) {
   const [order, setOrder] = useState<LoadedFile[]>([])
   const [result, setResult] = useState<MergeResult | null>(null)
   const [err, setErr] = useState<string | null>(null)
+  const [issues, setIssues] = useState<MergeIssue[]>([])
   const [running, setRunning] = useState(true)
   const [freshenId, setFreshenId] = useState(true)
   const [dragIdx, setDragIdx] = useState<number | null>(null)
@@ -56,10 +60,20 @@ export default function MergeView({ files, onBack: _onBack }: Props) {
     return () => { cancel = true }
   }, [files])
 
-  // Re-merge whenever order or freshenId changes
+  // Re-validate + re-merge whenever order or freshenId changes
   useEffect(() => {
     if (order.length < 2) return
+    setErr(null)
     setRunning(true)
+
+    const found = validateMergeFiles(order.map(x => ({ name: x.file.name, bytes: x.bytes })))
+    setIssues(found)
+    if (found.length > 0) {
+      setResult(null)
+      setRunning(false)
+      return
+    }
+
     try {
       const r = mergeFitMany(order.map(x => x.bytes), freshenId)
       setResult(r)
@@ -206,7 +220,54 @@ export default function MergeView({ files, onBack: _onBack }: Props) {
       {running && <p className="text-slate-400">⏳ {t('merge.running')}</p>}
       {err && <p className="text-red-400">⚠️ {err}</p>}
 
-      {result && !running && (
+      {issues.length > 0 && !running && (
+        <div className="card border border-red-500/40 bg-red-500/5">
+          <p className="text-red-300 font-medium mb-2">
+            ⚠️ {t('merge.validation.title')}
+          </p>
+          <p className="text-xs text-slate-400 mb-3">{t('merge.validation.intro')}</p>
+          <ul className="space-y-2 text-sm">
+            {issues.map((iss, idx) => (
+              <li key={idx} className="text-slate-200">
+                {iss.kind === 'invalid' && (
+                  <>
+                    <span className="font-mono text-slate-100">{iss.fileName}</span>
+                    {' — '}
+                    <span className="text-red-300">
+                      {t('merge.validation.invalid', { reason: iss.reason })}
+                    </span>
+                  </>
+                )}
+                {iss.kind === 'no-records' && (
+                  <>
+                    <span className="font-mono text-slate-100">{iss.fileName}</span>
+                    {' — '}
+                    <span className="text-red-300">{t('merge.validation.no_records')}</span>
+                  </>
+                )}
+                {iss.kind === 'overlap' && (
+                  <>
+                    <div className="text-red-300 mb-1">
+                      {t('merge.validation.overlap', {
+                        a: iss.aName,
+                        b: iss.bName,
+                        seconds: Math.round(iss.overlapSeconds),
+                      })}
+                    </div>
+                    <div className="text-xs text-slate-400 font-mono">
+                      <div>{iss.aName}: {iss.aStart.toLocaleString()} → {iss.aEnd.toLocaleString()}</div>
+                      <div>{iss.bName}: {iss.bStart.toLocaleString()} → {iss.bEnd.toLocaleString()}</div>
+                    </div>
+                  </>
+                )}
+              </li>
+            ))}
+          </ul>
+          <p className="text-xs text-slate-500 mt-3">{t('merge.validation.hint')}</p>
+        </div>
+      )}
+
+      {result && !running && issues.length === 0 && (
         <div className="card">
           <p className="text-brand-400 font-medium mb-4">✓ {t('merge.success')}</p>
 

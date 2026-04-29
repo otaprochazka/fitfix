@@ -25,18 +25,23 @@ User-visible features (all running through the same editor):
 | Detector / action | What it does |
 |---|---|
 | 🧵 Merge | Stitches 2+ `.fit` files into one. Plugin lives at `src/lib/edits/merge/`. Legacy standalone view (`src/components/MergeView.tsx`) is still the entry point from Home; the editor's merge panel is the in-flow path. |
-| 🧹 GPS jitter | Stationary "watch sat still but GPS wandered" clusters; pin / smooth / keep per cluster. Plugin at `src/lib/edits/jitter/`; legacy standalone view (`src/components/CleanView.tsx`) still exists. |
+| 🧹 GPS zigzag | Unified GPS-noise tool — stationary "watch sat still" clusters **and** on-the-move phantom back-and-forth, one advisor card, one panel. Per-finding `fix` / `keep`. Plugin at `src/lib/edits/zigzag/`. |
 | ⛰ Elevation fix | Net-delta-at-same-point + stationary-climb detectors; smooth / recompute / force-net-zero. |
 | ✂ Trim | Suspicious-start / suspicious-end advisor + manual trim by minutes. |
-| ⚡ Spike fixer | HR / power / speed spikes replaced by rolling median. |
-| 🧹 Strip streams | Drop HR / power / cadence / GPS / temp / altitude. Indoor one-click suggestion when GPS missing on outdoor sport. |
-| 🔒 Privacy zones | Geofence circles in localStorage; clip points inside on export. |
-| 🔁 Phantom loops | On-the-move loop detector (different from the stationary jitter one). Drops looping subsegments. |
-| ⏰ Time-shift | Future / pre-2010 / stale-upload detectors + manual offset panel. |
+| 🧹 Strip streams | Drop HR / power / cadence / GPS / temp / altitude. Indoor one-click suggestion when GPS missing on outdoor sport — flips Strava's "in a vehicle" flag without touching distance / sport / HR. |
 | ✂ Split | Cut at a chosen timestamp; produces two FIT files. |
-| 📊 Data track | Read-only multi-lane waveform (speed / elevation / HR / cadence / power / temp). |
 | 📍 Export | FIT (original bytes), GPX 1.1, TCX 1.0. |
-| 📥 Import | FIT and TCX. GPX import is on the roadmap. |
+| 📥 Import | FIT, TCX, GPX. |
+
+**Hidden but on disk** (excluded from the Vite glob in `src/lib/plugins/index.ts` — keep code, drop the negative pattern to revive):
+
+| Folder | Why it's hidden |
+|---|---|
+| `edits/jitter/`, `edits/loops/` | Merged into the unified `zigzag` tool. |
+| `edits/spikes/` | False-positive rate too high without per-stream tuning. |
+| `edits/privacy/` | UX never landed; geofence-on-export still works in code. |
+| `edits/timeshift/` | Detection rules need rework before re-exposing. |
+| `edits/track/` | Read-only waveform shipped via `ActivityTimeline.tsx` instead. |
 
 **Hosting**: deployed on Vercel from `main`. Every merge to main triggers an
 auto-deploy. Live URL: <https://fitfix.vercel.app>.
@@ -98,18 +103,23 @@ fitfix/
 │   │   │   ├── i18n.ts           # addEditorBundle helper (no central JSON edits)
 │   │   │   └── index.ts          # Vite-glob auto-discovers every edits/*/register.ts
 │   │   └── edits/                # ★ one folder per phase, isolated, auto-registered
-│   │       ├── jitter/           # GPS-jitter advisor card (wraps cleanJitter)
+│   │       ├── zigzag/           # ★ unified GPS-noise tool (stationary + moving)
 │   │       ├── elevation/        # net-delta + stationary-climb + 3 fix modes
 │   │       ├── trim/             # suspicious-start / -end + manual trim
-│   │       ├── spikes/           # HR / power / speed spike fixer
 │   │       ├── strip/            # strip streams + indoor one-click
-│   │       ├── privacy/          # geofence zones + clip on export
-│   │       ├── loops/            # on-the-move phantom-loop detector
-│   │       ├── timeshift/        # timezone repair / offset shift
+│   │       ├── merge/            # merge advisor + panel
 │   │       ├── split/            # split at chosen timestamp (two-file output)
-│   │       ├── track/            # read-only data-track waveform panel
-│   │       ├── tcx-import/       # parseTcxActivity (wired into activity.ts dispatcher)
-│   │       └── tcx-export/       # fitToTcx (wired into EditorView Export panel)
+│   │       ├── tcx-import/       # parseTcxActivity (wired into activity.ts)
+│   │       ├── tcx-export/       # fitToTcx (wired into EditorView Export panel)
+│   │       ├── gpx-import/       # parseGpxActivity (wired into activity.ts)
+│   │       │
+│   │       │  # Below: on disk, excluded from auto-discovery (see plugins/index.ts):
+│   │       ├── jitter/           # legacy stationary-jitter card — merged into zigzag
+│   │       ├── loops/            # legacy on-the-move loops card — merged into zigzag
+│   │       ├── spikes/           # HR / power / speed spike fixer (hidden)
+│   │       ├── privacy/          # geofence zones + clip on export (hidden)
+│   │       ├── timeshift/        # timezone repair / offset shift (hidden)
+│   │       └── track/            # read-only data-track waveform (hidden — see ActivityTimeline)
 │   ├── state/
 │   │   └── ActivityStore.tsx     # ★ React Context: history stack + apply / undo / redo
 │   ├── components/
@@ -383,10 +393,9 @@ prompt. Files stay on the user's disk (stdio transport, absolute paths).
 
 Implications for ongoing work in `src/lib/`:
 
-- Treat `src/lib/edits/*`, `src/lib/loops/`, `src/lib/jitter/`,
-  `src/lib/spikes/`, `src/lib/merge.ts`, `src/lib/rewrite.ts`,
+- Treat `src/lib/edits/*`, `src/lib/merge.ts`, `src/lib/rewrite.ts`,
   `src/lib/cleanJitter.ts`, `src/lib/findClusters.ts`, `src/lib/fitStats.ts`,
-  `src/lib/fitToGpx.ts`, and the TCX importer/exporter as **dual-target**:
+  `src/lib/fitToGpx.ts`, and the TCX/GPX importer/exporter as **dual-target**:
   must run in browser AND in Node. No `window`, `document`, `FileReader`,
   `URL.createObjectURL`, `localStorage` inside these modules — push such
   calls into a thin adapter consumed by the PWA only.
