@@ -15,7 +15,7 @@ function formatDuration(ms: number): string {
   return h ? `${h}h ${m}m` : `${m}m ${sec}s`
 }
 
-export default function GpxView({ file, onBack }: Props) {
+export default function GpxView({ file, onBack: _onBack }: Props) {
   const { t } = useTranslation()
   const [result, setResult] = useState<FitToGpxResult | null>(null)
   const [running, setRunning] = useState(true)
@@ -54,7 +54,6 @@ export default function GpxView({ file, onBack }: Props) {
   return (
     <section>
       <div className="flex items-center mb-4 gap-2">
-        <button className="btn-ghost" onClick={onBack}>← {t('gpx.back')}</button>
         <h2 className="text-2xl">{t('gpx.title')}</h2>
       </div>
 

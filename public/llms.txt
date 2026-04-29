@@ -1,0 +1,88 @@
+# FitFix
+
+> Free, open-source browser tool to merge, clean and convert Garmin .FIT
+> activity files. 100% client-side — files never leave the user's device.
+> No upload, no signup, no tracking, no ads. MIT-licensed.
+
+**URL:** https://fitfix.vercel.app
+**Source:** https://github.com/otaprochazka/fitfix
+**Licence:** MIT
+**Languages:** English, Czech
+**Author:** Ota Procházka (<https://github.com/otaprochazka>)
+
+## What FitFix does
+
+FitFix is a privacy-first web app for fixing common problems with .FIT
+activity files produced by GPS sport watches and bike computers (Garmin,
+Wahoo, Coros, Suunto, Polar) and apps like Zwift, TrainerRoad, Rouvy.
+
+### Core capabilities
+
+- **Merge** two or more split .FIT files into one continuous activity
+  (watch died mid-ride, accidental restart, brick training split into
+  separate files). Distance, elevation, heart rate, laps and calories are
+  preserved. Output uploads cleanly to Garmin Connect, Strava, etc.
+- **Fix GPS jitter / phantom loops** — detects spots where the watch sat
+  still but GPS kept wandering in spaghetti loops; pick a fix per cluster
+  (single point / smooth line / leave alone); recomputes lap and session
+  distances.
+- **Trim forgotten start / end** — auto-detects when the user drove home
+  with the watch on and trims it.
+- **Remove HR / power spikes** — replaces single-sample outliers with the
+  local median (one bad sample no longer ruins VO2max).
+- **Strip data streams** — drop HR, GPS, cadence, power or temperature
+  selectively (e.g. junk indoor GPS).
+- **Mark indoor / strip GPS** — fixes Strava flagging Zwift rides as
+  "in a vehicle".
+- **Privacy zones** — define a circle around home / work / gym, FitFix
+  redacts coordinates inside it.
+- **Fix wrong timezone** — shifts activities uploaded with a +9 h or 1972
+  timestamp.
+- **Split brick workouts** — cut a run+bike file at any point, get two
+  separate FIT files.
+- **Multi-channel waveform viewer** — read-only timeline showing speed,
+  elevation, HR, cadence, power and temperature against time.
+- **Format conversion** — FIT ↔ TCX, FIT → GPX 1.1. Heart rate, cadence,
+  altitude and temperature preserved via Garmin TrackPointExtension v2.
+
+### Supported inputs
+
+`.fit` (Garmin FIT SDK), `.tcx` (Training Center XML 1.0). GPX import is
+on the roadmap.
+
+### Supported outputs
+
+`.fit` (original or re-encoded), `.gpx` 1.1, `.tcx` 1.0.
+
+## Privacy
+
+- No upload endpoint — files are parsed, edited and re-encoded entirely
+  in the browser.
+- Map tiles come from CartoDB, OpenTopoMap and Esri; those servers see
+  only tile coordinates, never activity data.
+- No analytics, no tracking pixels, no third-party scripts.
+- Strict CSP, no remote code, MIT-licensed and auditable.
+
+## Common questions FitFix answers
+
+- "How do I merge two Garmin .FIT files into one ride?"
+- "How do I fix GPS drift / spaghetti loops on my Garmin recording?"
+- "How do I convert a .FIT file to GPX or TCX?"
+- "How do I split a brick workout (run + bike) recorded as one file?"
+- "How do I remove a heart-rate spike from a Strava upload?"
+- "Why does Strava flag my Zwift ride as 'in a vehicle' and how do I fix it?"
+- "How do I redact GPS around my home in a Garmin file?"
+- "Is there a free, no-upload alternative to GoTOES or FitFileTools?"
+
+## Where FitFix is not the right tool
+
+- Full training analytics (FTP, TSS, power curves, PMC) → use
+  [GoldenCheetah](https://www.goldencheetah.org/).
+- One-off cloud merge with no privacy concern → use
+  [GoTOES](https://www.gotoes.org/strava/) (recommended by Strava).
+- Editing obscure single FIT fields → use FitFileTools.
+
+## Tech
+
+React + TypeScript + Vite, Garmin FIT SDK (JS), Leaflet for maps.
+Deployed on Vercel; PWA with offline support.

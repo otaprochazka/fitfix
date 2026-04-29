@@ -6,10 +6,161 @@
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#0f172a" />
-    <meta name="description" content="Merge & clean Garmin .FIT activity files in your browser. 100% local, privacy-first, open source." />
-    <meta property="og:title" content="FitFix — Garmin .FIT toolkit" />
-    <meta property="og:description" content="Merge & clean Garmin .FIT activity files in your browser. 100% local, privacy-first, open source." />
-    <title>FitFix — Garmin .FIT toolkit</title>
+
+    <title>FitFix — Free online .FIT file editor, merger & GPS jitter cleaner (Garmin, Wahoo, Coros)</title>
+    <meta name="description" content="Free, open-source browser tool to merge split .FIT activities, fix GPS jitter, trim forgotten start/end, remove HR/power spikes, convert FIT ↔ TCX ↔ GPX. 100% local — your file never leaves your device. Works with Garmin, Wahoo, Coros, Suunto, Polar." />
+    <meta name="keywords" content="fit file editor, fit file merger, merge fit files, garmin fit editor, fit to gpx, fit to tcx, gps jitter, gps drift fix, garmin connect merge activities, strava fit edit, wahoo fit, coros fit, suunto fit, fix corrupted fit file, trim activity, remove hr spikes, split fit file, brick workout split, online fit toolkit, browser fit editor, privacy first activity editor, open source garmin tool" />
+    <meta name="author" content="Ota Procházka" />
+    <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
+    <meta name="googlebot" content="index,follow" />
+    <meta name="application-name" content="FitFix" />
+    <meta name="rating" content="general" />
+    <meta name="referrer" content="no-referrer" />
+
+    <link rel="canonical" href="https://fitfix.vercel.app/" />
+    <link rel="alternate" hreflang="en" href="https://fitfix.vercel.app/" />
+    <link rel="alternate" hreflang="cs" href="https://fitfix.vercel.app/?lang=cs" />
+    <link rel="alternate" hreflang="x-default" href="https://fitfix.vercel.app/" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="FitFix" />
+    <meta property="og:title" content="FitFix — Free .FIT editor, merger & GPS jitter cleaner" />
+    <meta property="og:description" content="Merge split activities, fix GPS jitter, convert FIT ↔ TCX ↔ GPX — 100% in your browser. Open source, no upload, no tracking. Works with Garmin, Wahoo, Coros, Suunto, Polar." />
+    <meta property="og:url" content="https://fitfix.vercel.app/" />
+    <meta property="og:image" content="https://fitfix.vercel.app/screenshot-clean.png" />
+    <meta property="og:image:alt" content="FitFix detecting GPS jitter on a Garmin activity, with a one-click fix preview." />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale:alternate" content="cs_CZ" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="FitFix — Free .FIT editor, merger & GPS jitter cleaner" />
+    <meta name="twitter:description" content="Merge split activities, fix GPS jitter, convert FIT ↔ TCX ↔ GPX — 100% in your browser. Open source, no upload, no tracking." />
+    <meta name="twitter:image" content="https://fitfix.vercel.app/screenshot-clean.png" />
+    <meta name="twitter:image:alt" content="FitFix detecting GPS jitter on a Garmin activity, with a one-click fix preview." />
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebApplication",
+          "@id": "https://fitfix.vercel.app/#webapp",
+          "name": "FitFix",
+          "alternateName": ["FitFix .FIT toolkit", "FitFix activity editor"],
+          "url": "https://fitfix.vercel.app/",
+          "description": "Free, open-source browser tool to merge, clean and convert Garmin .FIT activity files. 100% local — files never leave your device.",
+          "applicationCategory": "MultimediaApplication",
+          "applicationSubCategory": "Sports & Fitness file editor",
+          "operatingSystem": "Any (browser-based)",
+          "browserRequirements": "Requires a modern browser with WebAssembly and File API support (Chrome, Firefox, Safari, Edge).",
+          "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+          "softwareVersion": "1.x",
+          "license": "https://opensource.org/licenses/MIT",
+          "isAccessibleForFree": true,
+          "inLanguage": ["en", "cs"],
+          "keywords": "FIT file editor, FIT merger, GPS jitter cleaner, FIT to GPX, FIT to TCX, Garmin Connect, Strava, Wahoo, Coros, Suunto, Polar, activity editor, brick workout split, indoor activity, privacy zones",
+          "featureList": [
+            "Merge split .FIT activities into one continuous file",
+            "Detect and fix GPS jitter / phantom loops",
+            "Trim forgotten start and end of an activity",
+            "Remove heart-rate and power spikes",
+            "Strip individual data streams (HR, GPS, cadence, power, temp)",
+            "Mark indoor activities (strip GPS so Strava stops flagging as 'in vehicle')",
+            "Privacy zones around home / work / gym",
+            "Fix wrong timezone on uploaded activities",
+            "Split brick workouts (run+bike) into two FIT files",
+            "Convert FIT ↔ TCX and FIT → GPX 1.1",
+            "Multi-channel waveform viewer (speed, elevation, HR, cadence, power, temp)"
+          ],
+          "creator": { "@id": "https://fitfix.vercel.app/#person" },
+          "publisher": { "@id": "https://fitfix.vercel.app/#person" },
+          "image": "https://fitfix.vercel.app/screenshot-clean.png",
+          "screenshot": "https://fitfix.vercel.app/screenshot-clean.png",
+          "sameAs": ["https://github.com/otaprochazka/fitfix"]
+        },
+        {
+          "@type": "SoftwareApplication",
+          "@id": "https://fitfix.vercel.app/#software",
+          "name": "FitFix",
+          "applicationCategory": "UtilitiesApplication",
+          "operatingSystem": "Web",
+          "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+          "url": "https://fitfix.vercel.app/"
+        },
+        {
+          "@type": "Person",
+          "@id": "https://fitfix.vercel.app/#person",
+          "name": "Ota Procházka",
+          "url": "https://github.com/otaprochazka",
+          "sameAs": ["https://github.com/otaprochazka"]
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://fitfix.vercel.app/#website",
+          "url": "https://fitfix.vercel.app/",
+          "name": "FitFix",
+          "description": "Free, open-source browser tool to merge, clean and convert Garmin .FIT activity files.",
+          "inLanguage": ["en", "cs"],
+          "publisher": { "@id": "https://fitfix.vercel.app/#person" }
+        },
+        {
+          "@type": "FAQPage",
+          "@id": "https://fitfix.vercel.app/#faq",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "How do I merge two Garmin .FIT files into one activity?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Open FitFix at fitfix.vercel.app, drop two or more .fit files, choose Merge, drag to reorder if needed, then export. Distance, elevation, heart rate, laps and calories are preserved. The merged file uploads cleanly to Garmin Connect, Strava and similar services. Everything runs locally in your browser — no upload."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Does FitFix upload my activity to a server?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "No. FitFix is 100% client-side. There is no upload endpoint. Files are parsed, edited and re-encoded entirely in your browser. The only network requests are for map tiles (CartoDB / OpenTopoMap / Esri), which see only the tile coordinates — never your activity data."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Can FitFix fix GPS jitter or phantom GPS loops on my watch's recording?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. The cleaner detects spots where the watch sat still but GPS kept wandering in spaghetti loops. You pick a fix per cluster — single point, smooth line, or leave alone — and FitFix recomputes lap and session distances so totals are correct."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Can FitFix convert FIT to GPX or TCX?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. FitFix exports FIT, GPX 1.1 and TCX 1.0. Heart rate, cadence, altitude and temperature are kept via Garmin TrackPointExtension v2. Import supports FIT and TCX (GPX import is on the roadmap)."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Which devices does FitFix work with?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Any device that produces .fit or .tcx files: Garmin (Forerunner, Fenix, Edge, Venu, Instinct, Epix, Enduro), Wahoo (Elemnt, Bolt, Roam, Rival), Coros (Pace, Apex, Vertix), Suunto, Polar, and apps like Zwift, TrainerRoad, Rouvy that export FIT."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Is FitFix free? What's the catch?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Free and open source under the MIT licence. No ads, no tracking, no signup, no upload. Source: github.com/otaprochazka/fitfix. You can audit, self-host, or fork it."
+              }
+            }
+          ]
+        }
+      ]
+    }
+    </script>
   </head>
   <body>
     <div id="root"></div>

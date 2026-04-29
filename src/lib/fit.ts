@@ -123,7 +123,16 @@ function readDef(data: Uint8Array, off: number, devFlag: boolean):
   return { def: { arch, globalNum, fields, devFields, bodySize }, nextOff: off }
 }
 
-/** Walk all messages in the file. Yields refs to definition + data records. */
+/**
+ * Walk all messages in the file. Yields refs to definition + data records.
+ *
+ * Tolerant to vendor extensions: if we hit a header that references a local
+ * def number we never saw (e.g. Strava Android's custom messages with the
+ * reserved bit set), we log once and stop yielding. The unparsed tail is
+ * preserved byte-for-byte by callers like `cleanJitter` (which copy
+ * input→output and only patch specific offsets), so the unknown messages
+ * still make it into the exported file.
+ */
 export function* walkMessages(data: Uint8Array): Generator<FitMessageRef> {
   const header = parseHeader(data)
   const localDefs: (FitDef | null)[] = new Array(16).fill(null)
@@ -137,8 +146,13 @@ export function* walkMessages(data: Uint8Array): Generator<FitMessageRef> {
       // Compressed timestamp header — always a data record
       const localNum = (hb >> 5) & 0x03
       const def = localDefs[localNum]
-      if (!def)
-        throw new Error(`compressed-ts data record without active def at ${hdrOffset}`)
+      if (!def) {
+        console.warn(
+          `fit: compressed-ts record references undefined local=${localNum} at offset ${hdrOffset} — ` +
+          `stopping walk, remaining ${end - hdrOffset} bytes preserved as-is in export`
+        )
+        return
+      }
       yield { kind: 'data', hdrOffset, headerByte: hb, def, bodyOffset: pos, bodyLength: def.bodySize }
       pos += def.bodySize
     } else {
@@ -152,8 +166,13 @@ export function* walkMessages(data: Uint8Array): Generator<FitMessageRef> {
         pos = nextOff
       } else {
         const def = localDefs[localNum]
-        if (!def)
-          throw new Error(`data record without active def at ${hdrOffset}`)
+        if (!def) {
+          console.warn(
+            `fit: data record references undefined local=${localNum} (header 0x${hb.toString(16).padStart(2, '0')}) ` +
+            `at offset ${hdrOffset} — stopping walk, remaining ${end - hdrOffset} bytes preserved as-is in export`
+          )
+          return
+        }
         yield { kind: 'data', hdrOffset, headerByte: hb, def, bodyOffset: pos, bodyLength: def.bodySize }
         pos += def.bodySize
       }

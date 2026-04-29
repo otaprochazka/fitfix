@@ -1,31 +1,74 @@
 {
   "app": {
     "name": "FitFix",
-    "tagline": "Garmin .FIT toolkit, in your browser"
+    "tagline": "FIT activity toolkit, in your browser"
   },
   "nav": {
     "github": "GitHub",
     "language": "Language",
-    "donate": "Buy me a coffee"
+    "donate": "Buy me a coffee",
+    "home": "Home",
+    "section": {
+      "editor": "Editor",
+      "merge": "Merge",
+      "clean": "GPS jitter",
+      "gpx": "Convert to GPX"
+    }
   },
   "trust": {
     "local": "100% local — files never leave your device",
+    "local_short": "100% local",
     "open": "Open source (MIT)",
     "no_ads": "No ads, no tracking",
     "offline": "Works offline"
   },
+  "map": {
+    "click_to_interact": "Click to interact"
+  },
   "home": {
-    "headline": "Merge, clean & convert Garmin .FIT files",
-    "subhead": "Stitch a split activity back together. Remove GPS jitter from rest stops. Convert FIT to GPX. All in your browser — your files never leave your device.",
-    "drop": "Drop one or more .fit files here",
+    "headline": "Fix, merge & convert any FIT activity — in your browser.",
+    "subhead": "Drop a .fit or .tcx file from your watch or bike computer. The advisor finds what's wrong and offers a one-click fix. Your file never leaves your device.",
+    "drop": "Drop one or more .fit or .tcx files here",
     "or": "or",
     "browse": "Browse files",
     "merge_cta": "Merge files",
     "clean_cta": "Find GPS jitter",
     "gpx_cta": "Convert to GPX",
-    "two_files_hint": "Add 2+ files to merge. Add 1 file to clean GPS jitter or convert to GPX.",
+    "two_files_hint": "Add 1 file to open the unified Editor (advisor + tools + export). Add 2+ .fit files to use the legacy merge tool.",
     "uploaded": "Uploaded files",
     "clear_all": "Clear all",
+    "history": {
+      "title": "Recent activities",
+      "count": "{{n}} saved",
+      "empty": "Nothing here yet. Files you load are kept locally so you can resume them.",
+      "delete": "Remove from history",
+      "confirm_delete": "Remove this activity from history?",
+      "edits": "{{n}} edits",
+      "just_now": "just now",
+      "minutes_ago": "{{n}} min ago",
+      "hours_ago": "{{n}} h ago",
+      "days_ago": "{{n}} d ago",
+      "try_sample": "Try a sample",
+      "sample": {
+        "cycling": {
+          "label": "Cycling",
+          "meta": "92 km · Edge 500"
+        },
+        "running": {
+          "label": "Running",
+          "meta": "9 km · Fenix 2"
+        },
+        "swimming": {
+          "label": "Pool swim",
+          "meta": "2.6 km · indoor"
+        }
+      },
+      "sample_attribution": "Samples from",
+      "sample_source_label": "python-fitparse",
+      "sample_license": "MIT",
+      "sample_loading": "Loading sample…",
+      "sample_error": "Couldn't load the sample. Please try again."
+    },
     "merge": {
       "title": "Merge split activities",
       "desc": "Stitch 2+ .fit files into one continuous activity.",
@@ -49,25 +92,189 @@
       "bullet1": "Use FIT files in apps that only read GPX (Komoot, RideWithGPS, Locus, Mapy.cz, OsmAnd…).",
       "bullet2": "Heart rate, cadence, altitude and temperature kept via Garmin TrackPointExtension v2.",
       "bullet3": "One trkseg per activity. Sport type set automatically from the FIT session."
+    },
+    "editor": {
+      "title": "Open in Editor (preview)",
+      "desc": "All-in-one: see your activity, get suggested fixes, apply, export. Replaces the three tools below as features land."
+    },
+    "editor_cta": "Open in Editor",
+    "capabilities": {
+      "heading": "What FitFix can fix",
+      "sub": "Drop one file. The advisor surfaces what's worth fixing — you stay in control.",
+      "merge": { "title": "Merge split activities", "desc": "Watch died mid-ride and you got two files. We stitch them." },
+      "elevation": { "title": "Fix wrong elevation", "desc": "Garmin barometer says +200 m on a flat loop. We recompute." },
+      "trim": { "title": "Trim forgotten start / end", "desc": "You drove home with the watch on. We auto-detect and trim." },
+      "spikes": { "title": "Remove HR / power spikes", "desc": "One bad sample ruined your VO2max. We replace it with the local median." },
+      "streams": { "title": "Strip data streams", "desc": "Junk HR, junk GPS on indoor, sensitive cadence — drop any stream." },
+      "indoor": { "title": "Mark as indoor (Strip GPS)", "desc": "Strava flagged your Zwift ride as \"in a vehicle\"? One click." },
+      "privacy": { "title": "Privacy zones", "desc": "Define a circle around home; we clip every point inside before export." },
+      "loops": { "title": "Drop phantom GPS loops", "desc": "Watch hallucinated 8 km of zigzag on a 100 km race? Yes, that happens." },
+      "timezone": { "title": "Fix wrong timezone", "desc": "Activity uploaded at +9 h or in 1972? Shift it." },
+      "split": { "title": "Split brick workouts", "desc": "Run + bike recorded as one file. Cut at any point, get two FITs." },
+      "view": { "title": "See your data", "desc": "Multi-channel waveform per time — speed, elevation, HR, cadence, power, temperature." },
+      "convert": { "title": "Convert FIT ↔ TCX, FIT → GPX", "desc": "One unified import / export, no data loss for the channels TCX supports." }
+    },
+    "compare": {
+      "heading": "How FitFix compares",
+      "lead": "We're not trying to be GoldenCheetah. We're not trying to be Strava. Here's what we cover and what we send you elsewhere for.",
+      "col_tool": "Tool",
+      "col_license": "License",
+      "col_local": "Local-only?",
+      "col_merge": "Merge",
+      "col_trim": "Trim",
+      "col_loop": "Loop / GPS-glitch detection",
+      "col_elevation": "Elevation fix",
+      "col_privacy": "Privacy zones",
+      "col_io": "Multi-format I/O",
+      "col_ux": "UX in 3 words",
+      "us": "us",
+      "legend_yes": "Has it",
+      "legend_no": "Doesn't have it",
+      "elsewhere_heading": "It's not us, go here",
+      "elsewhere_cheetah": "Want full training analytics (FTP, TSS, power curves, PMC)? Use __LINK__ — open-source desktop, the gold standard.",
+      "elsewhere_gotoes": "Need just one cloud-based merge and you don't mind uploading? Use __LINK__ — the long-standing utility Strava itself recommends.",
+      "elsewhere_fft": "Want a one-off cloud edit for an obscure FIT field? Use __LINK__ — closed source, but covers the long tail."
+    }
+  },
+  "common": {
+    "back": "Back"
+  },
+  "editor": {
+    "loading": "Loading activity…",
+    "applying": "Applying edit…",
+    "undo": "Undo",
+    "redo": "Redo",
+    "history": "Edit history",
+    "overview": "Overview",
+    "back_to_overview": "Back to overview",
+    "discard_confirm": "You have unsaved edits. Leaving now discards them. Continue?",
+    "timeline": {
+      "title": "Values over time",
+      "reset_zoom": "Reset zoom",
+      "hint": "Hover/scrub the chart to read values · scroll to zoom · drag to pan",
+      "chart_label": "Chart:",
+      "map_label": "Map:",
+      "no_color": "—"
+    },
+    "streams": {
+      "label": "Color by",
+      "none": "—",
+      "altitude": "Elevation",
+      "hr": "HR",
+      "power": "Power",
+      "cadence": "Cadence",
+      "speed": "Speed"
+    },
+    "summary": {
+      "title": "Activity summary",
+      "points": "Points",
+      "distance": "Distance",
+      "duration": "Duration",
+      "start": "Start",
+      "end": "End",
+      "ascent": "Ascent",
+      "descent": "Descent",
+      "altitude": "Altitude",
+      "calories": "Calories",
+      "speed": "Speed",
+      "hr": "Heart rate",
+      "power": "Power",
+      "cadence": "Cadence",
+      "temperature": "Temp",
+      "max": "max {{v}}",
+      "indoor": "Indoor",
+      "yes": "Yes",
+      "no": "No",
+      "preview_badge": "Preview",
+      "title_secondary": "Second half"
+    },
+    "merge": {
+      "panel_desc": "Drop another .fit file to stitch onto this activity. The summary, timeline and map below preview the result before you apply.",
+      "drop": "Drop another .fit",
+      "drop_hint": "or click to browse",
+      "apply": "Apply merge",
+      "merging": "Merging…",
+      "computing_preview": "Computing preview…",
+      "preview_explainer": "Diffs in the summary and dashed lines on the timeline / map show what Apply would commit.",
+      "only_fit": "Only .fit files can be merged.",
+      "preview_label": "Merge with {{name}}"
+    },
+    "advisor": {
+      "title": "What we found",
+      "lead": "Each finding opens the matching tool with details — review what would change before applying anything.",
+      "scanning": "Scanning for issues…",
+      "empty": "No issues detected. The activity looks clean.",
+      "open_tool": "Open {{tool}}",
+      "open_generic": "Open tool",
+      "show_more": "Show {{count}} more",
+      "count_one": "{{count}} thing worth a look",
+      "count_other": "{{count}} things worth a look"
+    },
+    "manual": {
+      "title": "More tools",
+      "count": "{{n}} available",
+      "placeholder": "No manual tools loaded yet. They register automatically as feature phases land."
+    },
+    "tool": {
+      "back": "Back to activity",
+      "missing": "Tool not available for this activity.",
+      "collapse": "Hide",
+      "expand": "Show"
+    },
+    "tools": {
+      "trim":      { "desc": "Cut leading or trailing dead time — drove home with the watch on, etc." },
+      "spikes":    { "desc": "One bad sample and HR jumps to 240 BPM, power to 2000 W. Replaces the outlier with the average of nearby samples." },
+      "elevation": { "desc": "Recompute total ascent / descent or fix barometer drift." },
+      "privacy":   { "desc": "Define a circle around home / work; clip points inside before export." },
+      "timeshift": { "desc": "Shift every timestamp (wrong timezone, sync error, year-of-1972 bug)." },
+      "split":     { "desc": "Cut the activity at any point and download two FITs (brick run + bike, etc.)." },
+      "strip":     { "desc": "Drop entire data streams: junk HR, junk GPS on indoor, sensitive cadence." },
+      "track":     { "desc": "Inspect / fix track type and FIT file metadata." }
+    },
+    "export": {
+      "title": "Export",
+      "fit": "Download .fit",
+      "gpx": "Also as .gpx",
+      "tcx": "Also as .tcx",
+      "fresh_id": "Make file uploadable to Garmin Connect (new file ID)",
+      "fresh_id_help": "Garmin Connect refuses files with an ID it has already seen. Bumping the ID lets you upload the result even if you previously uploaded the original."
+    }
+  },
+  "preview": {
+    "label": "Preview · live editor",
+    "slide_editor": {
+      "alt": "FitFix editor — map and advisor findings",
+      "caption": "Editor: route on the map, advisor lists every fix worth a look."
+    },
+    "slide_jitter": {
+      "alt": "GPS jitter sub-tool with per-cluster controls",
+      "caption": "GPS jitter tool: pin, smooth or keep — per cluster, with a live preview."
+    },
+    "slide_clean": {
+      "alt": "Cluster fine-tuning view with map and detection settings",
+      "caption": "Fine-tune each cluster on the map; numbers update as you decide."
     }
   },
   "how": {
     "title": "How it works",
     "step1": {
-      "title": "Drop your .fit file(s)",
-      "body": "1 file → clean GPS jitter or convert to GPX. 2 or more files → merge into one activity. Files are read locally; nothing is uploaded."
+      "title": "Drop",
+      "body": "Drop a .fit or .tcx from any device. Files load in your browser; nothing is uploaded.",
+      "short": "Loads in your browser. Nothing is uploaded."
     },
     "step2": {
-      "title": "Review on the map",
-      "body": "For cleaning: every detected jitter cluster shows on the map with a numbered pin. Pick a fix per cluster and see the saved distance update in real time."
+      "title": "Review",
+      "body": "The editor opens with a map, channel summary, and an advisor panel. The advisor scans the file and suggests fixes — each card explains the problem in one sentence and offers one-click Apply or Dismiss. You can also open the manual tools drawer for full control.",
+      "short": "Advisor flags what's wrong; you click Apply or Dismiss."
     },
     "step3": {
-      "title": "Download & upload",
-      "body": "The output .fit is bit-identical to your original except for the fields you changed. Optionally bump the file ID so Garmin Connect treats it as a new upload."
+      "title": "Export",
+      "body": "Download as .fit (bit-identical to your input except for the fields you changed), .gpx 1.1 with Garmin TrackPointExtension v2, or TCX 1.0. Re-upload to Garmin Connect, Strava, Komoot, anywhere.",
+      "short": "Download .fit / .gpx / .tcx and upload anywhere."
     },
-    "screenshot_alt": "Screenshot of the GPS jitter cleanup map view",
-    "screenshot_label": "Preview · GPS jitter cleanup",
-    "screenshot_caption": "Numbered clusters mark where GPS drifted while you stood still. Pick which to flatten."
+    "screenshot_alt": "Screenshot of the editor with the advisor panel",
+    "screenshot_label": "Preview · editor with advisor",
+    "screenshot_caption": "The advisor surfaces what's worth fixing — apply or dismiss each suggestion."
   },
   "security": {
     "local": {
@@ -93,6 +300,7 @@
     "success": "Done. Combined activity ready.",
     "order_hint": "Drag to reorder. Files are auto-sorted chronologically by default.",
     "restore_chrono": "Restore chronological order",
+    "drop_more": "Drop to add file…",
     "summary": {
       "distance": "Distance",
       "timer": "Timer",
@@ -165,7 +373,8 @@
     "not_fit": "{{name}} doesn't look like a valid .FIT file.",
     "merge_needs_two_plus": "Merging needs at least 2 .fit files.",
     "clean_needs_one": "Cleaning needs exactly 1 .fit file.",
-    "gpx_needs_one": "GPX conversion needs exactly 1 .fit file."
+    "gpx_needs_one": "GPX conversion needs exactly 1 .fit file.",
+    "editor_needs_one": "The editor opens one .fit file at a time."
   },
   "footer": {
     "made_with": "Made with",
@@ -173,6 +382,7 @@
     "source": "Source",
     "issues": "Report an issue",
     "feature_request": "Missing a feature?",
-    "donate": "Buy me a coffee"
+    "donate": "Buy me a coffee",
+    "open_source": "Open source"
   }
 }

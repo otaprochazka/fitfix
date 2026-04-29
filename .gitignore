@@ -12,6 +12,15 @@ dist
 dist-ssr
 *.local
 
+# Test runner output
+coverage
+.vitest-cache
+playwright-report
+test-results
+
+# Local-only assets (not for the public repo)
+avatar
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

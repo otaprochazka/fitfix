@@ -1,31 +1,74 @@
 {
   "app": {
     "name": "FitFix",
-    "tagline": "Garmin .FIT toolkit ve tvém prohlížeči"
+    "tagline": "FIT toolkit ve tvém prohlížeči"
   },
   "nav": {
     "github": "GitHub",
     "language": "Jazyk",
-    "donate": "Pošli mi kafe"
+    "donate": "Pošli mi kafe",
+    "home": "Domů",
+    "section": {
+      "editor": "Editor",
+      "merge": "Sloučit",
+      "clean": "GPS motanice",
+      "gpx": "Převod na GPX"
+    }
   },
   "trust": {
     "local": "100% lokální — soubory neopustí tvoje zařízení",
+    "local_short": "100% lokální",
     "open": "Open source (MIT)",
     "no_ads": "Žádné reklamy, žádný tracking",
     "offline": "Funguje offline"
   },
+  "map": {
+    "click_to_interact": "Kliknutím aktivuješ mapu"
+  },
   "home": {
-    "headline": "Slučování, čištění & konverze Garmin .FIT souborů",
-    "subhead": "Slep rozpadlou aktivitu dohromady. Vyčisti GPS motanice z míst, kde ses zastavil. Převeď FIT na GPX. Vše v prohlížeči — soubory neopustí tvoje zařízení.",
-    "drop": "Sem přetáhni jeden nebo víc .fit souborů",
+    "headline": "Oprav, sluč & převeď libovolný FIT — přímo v prohlížeči.",
+    "subhead": "Hoď sem .fit nebo .tcx z hodinek nebo cyklopočítače. Advisor najde co je špatně a nabídne opravu na jeden klik. Soubor neopustí tvoje zařízení.",
+    "drop": "Sem přetáhni jeden nebo víc .fit nebo .tcx souborů",
     "or": "nebo",
     "browse": "Vyber soubory",
     "merge_cta": "Sloučit",
     "clean_cta": "Najít motanice",
     "gpx_cta": "Převést na GPX",
-    "two_files_hint": "Přidej 2+ souborů ke sloučení. Přidej 1 soubor pro čištění motanic nebo převod na GPX.",
+    "two_files_hint": "Přidej 1 soubor pro Editor (advisor + nástroje + export). Přidej 2+ .fit souborů pro klasické sloučení.",
     "uploaded": "Nahrané soubory",
     "clear_all": "Smazat vše",
+    "history": {
+      "title": "Nedávné aktivity",
+      "count": "{{n}} uloženo",
+      "empty": "Zatím tu není nic. Soubor, který nahraješ, se uloží automaticky a najdeš ho tu pro pokračování.",
+      "delete": "Smazat z historie",
+      "confirm_delete": "Smazat tuto aktivitu z historie?",
+      "edits": "{{n}} úprav",
+      "just_now": "právě teď",
+      "minutes_ago": "před {{n}} min",
+      "hours_ago": "před {{n}} h",
+      "days_ago": "před {{n}} dny",
+      "try_sample": "Zkus ukázku",
+      "sample": {
+        "cycling": {
+          "label": "Cyklo",
+          "meta": "92 km · Edge 500"
+        },
+        "running": {
+          "label": "Běh",
+          "meta": "9 km · Fenix 2"
+        },
+        "swimming": {
+          "label": "Plavání",
+          "meta": "2,6 km · bazén"
+        }
+      },
+      "sample_attribution": "Ukázky z",
+      "sample_source_label": "python-fitparse",
+      "sample_license": "MIT",
+      "sample_loading": "Načítám ukázku…",
+      "sample_error": "Ukázku se nepodařilo načíst. Zkus to prosím znovu."
+    },
     "merge": {
       "title": "Slučování rozpadlé aktivity",
       "desc": "Slep 2+ .fit souborů do jedné souvislé aktivity.",
@@ -49,25 +92,191 @@
       "bullet1": "Použij FIT v aplikacích, které čtou jen GPX (Komoot, RideWithGPS, Locus, Mapy.cz, OsmAnd…).",
       "bullet2": "Tep, kadence, výška a teplota přes Garmin TrackPointExtension v2.",
       "bullet3": "Jeden trkseg na aktivitu. Sport se nastaví automaticky podle FIT session."
+    },
+    "editor": {
+      "title": "Otevřít v Editoru (preview)",
+      "desc": "Vše v jednom: aktivita, návrhy oprav, aplikace, export. Postupně nahradí tři nástroje níže."
+    },
+    "editor_cta": "Otevřít v Editoru",
+    "capabilities": {
+      "heading": "Co FitFix umí opravit",
+      "sub": "Hoď sem soubor. Advisor ukáže co stojí za opravu — co aplikuješ, je na tobě.",
+      "merge": { "title": "Sluč rozpadlou aktivitu", "desc": "Hodinky umřely uprostřed jízdy a máš dva soubory. Slepíme je." },
+      "elevation": { "title": "Oprav špatné převýšení", "desc": "Garmin barometer hlásí +200 m na rovinaté smyčce. Přepočítáme." },
+      "trim": { "title": "Useč zapomenutý začátek / konec", "desc": "Dojel jsi domů s hodinkami zapnutými. Detekujeme a uřízneme." },
+      "spikes": { "title": "Odeber HR / power spikes", "desc": "Jeden špatný vzorek zničil tvoje VO2max. Nahradíme ho lokálním mediánem." },
+      "streams": { "title": "Odeber proudy dat", "desc": "Nesmyslné HR, nesmyslné GPS na indooru, citlivá kadence — zahoď libovolný stream." },
+      "indoor": { "title": "Označ jako indoor (odeber GPS)", "desc": "Strava ti označila Zwift jízdu jako \"in a vehicle\"? Jeden klik." },
+      "privacy": { "title": "Privacy zóny", "desc": "Definuj kruh kolem domu; před exportem ořízneme každý bod uvnitř." },
+      "loops": { "title": "Odstraň fantom GPS smyčky", "desc": "Hodinky nahalucinovaly 8 km cikcaků na 100 km závodě? Jo, stává se." },
+      "timezone": { "title": "Oprav špatné časové pásmo", "desc": "Aktivita nahraná v +9 h nebo v roce 1972? Posuň ji." },
+      "split": { "title": "Rozděl brick workout", "desc": "Běh + kolo nahrané jako jeden soubor. Rozřízni kdekoliv, máš dva FIT." },
+      "view": { "title": "Prohlédni si data", "desc": "Multikanálový waveform v čase — rychlost, výška, HR, kadence, výkon, teplota." },
+      "convert": { "title": "Převody FIT ↔ TCX, FIT → GPX", "desc": "Jeden sjednocený import / export, žádná ztráta dat pro kanály které TCX podporuje." }
+    },
+    "compare": {
+      "heading": "Jak FitFix vypadá proti ostatním",
+      "lead": "Nesnažíme se být GoldenCheetah. Nesnažíme se být Strava. Tady je co děláme a kam tě posíláme pro zbytek.",
+      "col_tool": "Nástroj",
+      "col_license": "Licence",
+      "col_local": "Jen lokálně?",
+      "col_merge": "Slučování",
+      "col_trim": "Trim",
+      "col_loop": "Detekce smyček / GPS chyb",
+      "col_elevation": "Oprava výšky",
+      "col_privacy": "Privacy zóny",
+      "col_io": "Multi-formát I/O",
+      "col_ux": "UX ve 3 slovech",
+      "us": "my",
+      "legend_yes": "Má to",
+      "legend_no": "Nemá to",
+      "elsewhere_heading": "Tohle nejsme my, jdi jinam",
+      "elsewhere_cheetah": "Chceš plnou tréninkovou analytiku (FTP, TSS, power křivky, PMC)? Použij __LINK__ — open-source desktop, gold standard.",
+      "elsewhere_gotoes": "Stačí ti jeden cloud merge a nevadí ti uploadnout? Použij __LINK__ — osvědčený nástroj, který Strava sama doporučuje.",
+      "elsewhere_fft": "Potřebuješ jednorázovou cloud editaci nějakého obskurního FIT pole? Použij __LINK__ — closed source, ale pokrývá long tail."
+    }
+  },
+  "common": {
+    "back": "Zpět"
+  },
+  "editor": {
+    "loading": "Načítám aktivitu…",
+    "applying": "Aplikuji změnu…",
+    "undo": "Zpět",
+    "redo": "Vpřed",
+    "history": "Historie úprav",
+    "overview": "Přehled",
+    "back_to_overview": "Zpět na přehled",
+    "discard_confirm": "Máš rozpracované úpravy. Pokud teď odejdeš, ztratí se. Pokračovat?",
+    "timeline": {
+      "title": "Hodnoty v čase",
+      "reset_zoom": "Reset zoom",
+      "hint": "Hover/scrub na grafu pro zobrazení hodnot · kolečko myši zoomuje · drag posouvá",
+      "chart_label": "Graf:",
+      "map_label": "Mapa:",
+      "no_color": "—"
+    },
+    "streams": {
+      "label": "Zvýraznit",
+      "none": "—",
+      "altitude": "Výška",
+      "hr": "Tep",
+      "power": "Výkon",
+      "cadence": "Kadence",
+      "speed": "Rychlost"
+    },
+    "summary": {
+      "title": "Přehled aktivity",
+      "points": "Bodů",
+      "distance": "Vzdálenost",
+      "duration": "Doba",
+      "start": "Začátek",
+      "end": "Konec",
+      "ascent": "Stoupání",
+      "descent": "Klesání",
+      "altitude": "Výška",
+      "calories": "Kalorie",
+      "speed": "Rychlost",
+      "hr": "Tep",
+      "power": "Výkon",
+      "cadence": "Kadence",
+      "temperature": "Teplota",
+      "max": "max {{v}}",
+      "indoor": "Indoor",
+      "yes": "Ano",
+      "no": "Ne",
+      "preview_badge": "Náhled",
+      "title_secondary": "Druhá půlka"
+    },
+    "merge": {
+      "panel_desc": "Přidej další .fit soubor pro spojení s touto aktivitou. Souhrn, časová osa i mapa níže ukáží, jak by sloučení vypadalo, ještě než ho potvrdíš.",
+      "drop": "Přetáhni další .fit",
+      "drop_hint": "nebo klikni pro výběr",
+      "apply": "Sloučit",
+      "merging": "Slučuji…",
+      "computing_preview": "Počítám náhled…",
+      "preview_explainer": "Změny v souhrnu a tečkované linky v grafu / mapě ukazují, co tlačítko Sloučit zapíše.",
+      "only_fit": "Sloučit lze jen .fit soubory.",
+      "preview_label": "Sloučit s {{name}}"
+    },
+    "advisor": {
+      "title": "Co jsme našli",
+      "lead": "Každý nález otevře odpovídající nástroj s detaily — než cokoliv aplikuješ, uvidíš co by se změnilo.",
+      "scanning": "Hledám problémy…",
+      "empty": "Žádné problémy nenalezeny. Aktivita vypadá v pořádku.",
+      "open_tool": "Otevřít {{tool}}",
+      "open_generic": "Otevřít nástroj",
+      "show_more": "Zobrazit dalších {{count}}",
+      "count_one": "{{count}} věc, na kterou bys měl mrknout",
+      "count_few": "{{count}} věci, na které bys měl mrknout",
+      "count_many": "{{count}} věcí, na které bys měl mrknout",
+      "count_other": "{{count}} věcí, na které bys měl mrknout"
+    },
+    "manual": {
+      "title": "Další nástroje",
+      "count": "{{n}} k dispozici",
+      "placeholder": "Žádné manuální nástroje zatím nejsou načtené. Registrují se postupně, jak přibývají fáze."
+    },
+    "tool": {
+      "back": "Zpět na aktivitu",
+      "missing": "Nástroj není pro tuto aktivitu dostupný.",
+      "collapse": "Skrýt",
+      "expand": "Zobrazit"
+    },
+    "tools": {
+      "trim":      { "desc": "Useč prázdný začátek nebo konec — dojel jsi domů se zapnutými hodinkami atd." },
+      "spikes":    { "desc": "Hodinky chytly jeden chybný vzorek a HR vystřelilo na 240, výkon na 2000 W. Nahradí ten výkyv průměrem okolních hodnot." },
+      "elevation": { "desc": "Přepočítej celkové stoupání / klesání nebo oprav drift barometru." },
+      "privacy":   { "desc": "Definuj kruh kolem domova / práce; před exportem ořízne body uvnitř." },
+      "timeshift": { "desc": "Posuň všechny timestampy (špatné časové pásmo, sync chyba, rok 1972)." },
+      "split":     { "desc": "Rozřízni aktivitu kdekoliv a stáhni dva FITy (brick běh + kolo apod.)." },
+      "strip":     { "desc": "Odeber celé datové proudy: blbé HR, indoor GPS, citlivá kadence." },
+      "track":     { "desc": "Prohlédni / oprav typ trasy a FIT metadata." }
+    },
+    "export": {
+      "title": "Export",
+      "fit": "Stáhnout .fit",
+      "gpx": "Také jako .gpx",
+      "tcx": "Také jako .tcx",
+      "fresh_id": "Připravit pro nahrání do Garmin Connect (nové file ID)",
+      "fresh_id_help": "Garmin Connect odmítá soubory s ID, které už zná. Změnou ID půjde výsledek nahrát i když jsi už dříve nahrál originál."
+    }
+  },
+  "preview": {
+    "label": "Náhled · živý editor",
+    "slide_editor": {
+      "alt": "FitFix editor — mapa a nálezy advisora",
+      "caption": "Editor: trasa na mapě, advisor vypíše vše, co stojí za pohled."
+    },
+    "slide_jitter": {
+      "alt": "Nástroj na GPS motanice s ovládáním per-cluster",
+      "caption": "GPS motanice: pin, smooth nebo nechat — per cluster, s live náhledem."
+    },
+    "slide_clean": {
+      "alt": "Doladění clusterů — mapa a Detection settings",
+      "caption": "Dolaď každý cluster na mapě; čísla se mění jak rozhoduješ."
     }
   },
   "how": {
     "title": "Jak to funguje",
     "step1": {
-      "title": "Přetáhni .fit soubor(y)",
-      "body": "1 soubor → čištění motanic nebo převod na GPX. 2+ souborů → sloučení do jedné aktivity. Vše se čte lokálně, nic se neuploaduje."
+      "title": "Hoď sem soubor",
+      "body": "Hoď sem .fit nebo .tcx z libovolného zařízení. Soubor se načte v prohlížeči; nikam se neuploaduje.",
+      "short": "Načte se v prohlížeči, nikam se neuploaduje."
     },
     "step2": {
-      "title": "Mrkni na mapu",
-      "body": "U čištění: každá detekovaná motanice se zobrazí jako číslovaný pin. Vyber pro každou způsob řešení a uvidíš ušetřené metry v reálném čase."
+      "title": "Projdi návrhy s advisorem",
+      "body": "Editor zobrazí mapu, souhrn kanálů a panel s návrhy. Advisor projede soubor a navrhne opravy — každá karta popíše problém jednou větou a nabídne Použít / Zamítnout. Pro plnou kontrolu je tu i šuplík s manuálními nástroji.",
+      "short": "Advisor najde co je špatně, ty klikneš Použít / Zamítnout."
     },
     "step3": {
-      "title": "Stáhni & nahraj",
-      "body": "Výstupní .fit je bit-identický s originálem až na pole, která jsi změnil. Volitelně se pohne file ID, aby to Garmin Connect bral jako nový soubor."
+      "title": "Exportuj",
+      "body": "Stáhni jako .fit (bit-identický s originálem až na pole, která jsi změnil), .gpx 1.1 s Garmin TrackPointExtension v2, nebo TCX 1.0. Nahraj do Garmin Connect, Stravy, Komootu, kamkoliv.",
+      "short": "Stáhni .fit / .gpx / .tcx a nahraj kamkoliv."
     },
-    "screenshot_alt": "Ukázka mapy s detekovanými GPS motanicemi",
-    "screenshot_label": "Náhled · čištění GPS motanic",
-    "screenshot_caption": "Číslované clustery označují, kde GPS lítala, když ses nehýbal. Vyber, které srovnat."
+    "screenshot_alt": "Ukázka editoru s panelem advisora",
+    "screenshot_label": "Náhled · editor s advisorem",
+    "screenshot_caption": "Advisor ukáže co stojí za opravu — každý návrh můžeš použít nebo zamítnout."
   },
   "security": {
     "local": {
@@ -93,6 +302,7 @@
     "success": "Hotovo. Sloučená aktivita je připravená.",
     "order_hint": "Přetáhni řádky pro změnu pořadí. Defaultně řazeno chronologicky.",
     "restore_chrono": "Obnovit chronologické pořadí",
+    "drop_more": "Pusť pro přidání souboru…",
     "summary": {
       "distance": "Vzdálenost",
       "timer": "Čistý čas",
@@ -165,7 +375,8 @@
     "not_fit": "{{name}} nevypadá jako platný .FIT soubor.",
     "merge_needs_two_plus": "Slučování vyžaduje aspoň 2 .fit soubory.",
     "clean_needs_one": "Čištění vyžaduje přesně 1 .fit soubor.",
-    "gpx_needs_one": "Převod na GPX vyžaduje přesně 1 .fit soubor."
+    "gpx_needs_one": "Převod na GPX vyžaduje přesně 1 .fit soubor.",
+    "editor_needs_one": "Editor pracuje s jedním .fit souborem."
   },
   "footer": {
     "made_with": "Vyrobeno",
@@ -173,6 +384,7 @@
     "source": "Zdrojový kód",
     "issues": "Nahlásit chybu",
     "feature_request": "Chybí funkce?",
-    "donate": "Pošli mi kafe"
+    "donate": "Pošli mi kafe",
+    "open_source": "Open source"
   }
 }

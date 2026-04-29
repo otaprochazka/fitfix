@@ -11,16 +11,32 @@ Read it once before starting work; you will save several round-trips.
 
 ## 1. What FitFix is
 
-A privacy-first, browser-only PWA that operates on Garmin **.fit activity
-files**. Three user-facing functions, all run 100 % client-side:
+A privacy-first, browser-only PWA for **`.fit` and `.tcx` activity files**
+from any vendor — Garmin, Wahoo, Coros, Polar, Bryton, Lezyne, Hammerhead,
+Stages, Zwift, Suunto. 100 % client-side.
 
-| Icon | Function | What it does |
-|---|---|---|
-| 🧵 | **Merge** | Stitch 2+ .fit files into one continuous activity (e.g. activity that the watch split because of a battery save / restart). |
-| 🧹 | **Clean** | Detect "GPS jitter" clusters where the watch sat still but GPS kept wandering, and let the user collapse each one (Pin / Smooth / Keep). |
-| 📍 | **GPX** | Convert .fit to GPX 1.1 with HR / cadence / altitude / temperature via Garmin TrackPointExtension v2. |
+The product is a **unified, advisor-led editor**: drop a file, get
+suggested fixes from the registered detectors, apply the ones you want,
+export. The shell is `src/components/EditorView.tsx` and the plugin
+contracts live under `src/lib/plugins/`.
 
-Both Merge and Clean also offer a one-click "Also as .gpx" secondary download.
+User-visible features (all running through the same editor):
+
+| Detector / action | What it does |
+|---|---|
+| 🧵 Merge | Stitches 2+ `.fit` files into one. Plugin lives at `src/lib/edits/merge/`. Legacy standalone view (`src/components/MergeView.tsx`) is still the entry point from Home; the editor's merge panel is the in-flow path. |
+| 🧹 GPS jitter | Stationary "watch sat still but GPS wandered" clusters; pin / smooth / keep per cluster. Plugin at `src/lib/edits/jitter/`; legacy standalone view (`src/components/CleanView.tsx`) still exists. |
+| ⛰ Elevation fix | Net-delta-at-same-point + stationary-climb detectors; smooth / recompute / force-net-zero. |
+| ✂ Trim | Suspicious-start / suspicious-end advisor + manual trim by minutes. |
+| ⚡ Spike fixer | HR / power / speed spikes replaced by rolling median. |
+| 🧹 Strip streams | Drop HR / power / cadence / GPS / temp / altitude. Indoor one-click suggestion when GPS missing on outdoor sport. |
+| 🔒 Privacy zones | Geofence circles in localStorage; clip points inside on export. |
+| 🔁 Phantom loops | On-the-move loop detector (different from the stationary jitter one). Drops looping subsegments. |
+| ⏰ Time-shift | Future / pre-2010 / stale-upload detectors + manual offset panel. |
+| ✂ Split | Cut at a chosen timestamp; produces two FIT files. |
+| 📊 Data track | Read-only multi-lane waveform (speed / elevation / HR / cadence / power / temp). |
+| 📍 Export | FIT (original bytes), GPX 1.1, TCX 1.0. |
+| 📥 Import | FIT and TCX. GPX import is on the roadmap. |
 
 **Hosting**: deployed on Vercel from `main`. Every merge to main triggers an
 auto-deploy. Live URL: <https://fitfix.vercel.app>.
@@ -54,29 +70,61 @@ fitfix/
 │   ├── icon-{192,512,512-maskable}.png   # PWA icons (rasterised from favicon.svg)
 │   ├── apple-touch-icon.png
 │   └── screenshot-clean.png      # used in the HowItWorks section
-├── avatar/                       # off-site brand assets (Buy Me a Coffee
-│                                 # profile photo, NOT served by Vite)
+├── docs/                         # research, lessons, roadmap (see docs/README.md)
 ├── scripts/
-│   └── test-merge.ts             # node script: merge two FITs, report sizes + parse-back
+│   ├── test-merge.ts             # node script: merge two FITs, report sizes + parse-back
+│   ├── bench-merge.ts            # benchmark used in the April 2026 perf investigation
+│   └── analyze-profile.ts        # parse a Firefox profiler JSON.gz → hot-frame summary
+├── tests/                        # Vitest suite (api/, fixtures/, setup/, stubs/)
 ├── src/
-│   ├── lib/                      # pure logic, framework-free, well-tested
+│   ├── lib/                      # pure logic, framework-free
 │   │   ├── fit.ts                # ★ byte-level FIT walker (parser + encoder primitives)
-│   │   ├── findClusters.ts       # GPS jitter cluster detection
+│   │   ├── activity.ts           # ★ NormalizedActivity model + parseActivity dispatcher
+│   │   ├── edit.ts               # Edit interface + applyEdit
+│   │   ├── rewrite.ts            # ★ structural FIT rewrite (dropRecords / trimToRange / splitAt)
+│   │   ├── findClusters.ts       # stationary GPS jitter cluster detection (legacy)
 │   │   ├── cleanJitter.ts        # apply per-cluster fix modes, recompute distances
-│   │   ├── merge.ts              # ★ FitEncoder (LRU) + sessionsynth + N-file merge
+│   │   ├── merge.ts              # FitEncoder (LRU) + sessionsynth + N-file merge
 │   │   ├── fitToGpx.ts           # FIT → GPX 1.1 + TrackPointExtension v2
 │   │   ├── fitStats.ts           # fast summary (sport / distance / duration / point count)
-│   │   └── download.ts           # tiny browser blob-download helper
+│   │   ├── download.ts           # tiny browser blob-download helper
+│   │   ├── persist.ts            # ★ PWA-only: localStorage history + useLocalBool hook
+│   │   ├── preview.ts            # shared preview channel (editor → plugin panels)
+│   │   ├── usePreview.ts         # React hook used by manual-action panels for live preview
+│   │   ├── streamColors.ts       # canonical colour ramps for HR / power / cadence / speed
+│   │   ├── plugins/              # ★ editor plugin contracts
+│   │   │   ├── types.ts          # Detector / Suggestion / ManualAction interfaces
+│   │   │   ├── registry.ts       # registerDetector / registerManualAction singletons
+│   │   │   ├── i18n.ts           # addEditorBundle helper (no central JSON edits)
+│   │   │   └── index.ts          # Vite-glob auto-discovers every edits/*/register.ts
+│   │   └── edits/                # ★ one folder per phase, isolated, auto-registered
+│   │       ├── jitter/           # GPS-jitter advisor card (wraps cleanJitter)
+│   │       ├── elevation/        # net-delta + stationary-climb + 3 fix modes
+│   │       ├── trim/             # suspicious-start / -end + manual trim
+│   │       ├── spikes/           # HR / power / speed spike fixer
+│   │       ├── strip/            # strip streams + indoor one-click
+│   │       ├── privacy/          # geofence zones + clip on export
+│   │       ├── loops/            # on-the-move phantom-loop detector
+│   │       ├── timeshift/        # timezone repair / offset shift
+│   │       ├── split/            # split at chosen timestamp (two-file output)
+│   │       ├── track/            # read-only data-track waveform panel
+│   │       ├── tcx-import/       # parseTcxActivity (wired into activity.ts dispatcher)
+│   │       └── tcx-export/       # fitToTcx (wired into EditorView Export panel)
+│   ├── state/
+│   │   └── ActivityStore.tsx     # ★ React Context: history stack + apply / undo / redo
 │   ├── components/
-│   │   ├── App.tsx               # view router (state, no react-router)
+│   │   ├── EditorView.tsx        # ★ unified editor: summary + map + advisor + manual tools + export
+│   │   ├── ActivityTimeline.tsx  # ★ multi-lane waveform (speed / elevation / HR / cadence / power / temp)
 │   │   ├── Header.tsx            # logo, language picker, ☕ donate, GitHub
 │   │   ├── TrustBar.tsx          # 100% local · open source · no ads · works offline
 │   │   ├── Footer.tsx
-│   │   ├── DropZone.tsx          # drag & drop / file picker for .fit
-│   │   ├── HomeView.tsx          # landing, foldable feature panels, file stats
-│   │   ├── MergeView.tsx         # merge result + drag-to-reorder + track preview
-│   │   ├── CleanView.tsx         # cluster modes + map + freshen-id checkbox
-│   │   ├── GpxView.tsx           # one-click FIT → GPX
+│   │   ├── DropZone.tsx          # drag & drop / file picker for .fit and .tcx
+│   │   ├── HomeView.tsx          # landing: drop zone + recent activities + capabilities + previews
+│   │   ├── AppPreviewCarousel.tsx# screenshots carousel on the landing page
+│   │   ├── CapabilitiesGrid.tsx  # capability tiles on the landing page
+│   │   ├── MergeView.tsx         # legacy merge result + drag-to-reorder + track preview
+│   │   ├── CleanView.tsx         # legacy cluster modes + map + freshen-id checkbox
+│   │   ├── GpxView.tsx           # legacy one-click FIT → GPX
 │   │   ├── JitterMap.tsx         # Leaflet map with numbered cluster markers
 │   │   ├── TrackPreview.tsx      # Leaflet map with single track polyline + start/end
 │   │   ├── SecurityBadges.tsx    # 4-card explainer below HowItWorks
@@ -192,6 +240,11 @@ npm run preview
 # lint (ESLint, currently warning-only)
 npm run lint
 
+# tests (Vitest)
+npm test                          # one-shot
+npm run test:watch                # watch mode
+npm run test:coverage             # with coverage
+
 # repro / regression-test the merge encoder
 ./node_modules/.bin/tsx scripts/test-merge.ts \
   ~/path/to/in1.fit ~/path/to/in2.fit /tmp/out.fit
@@ -295,7 +348,10 @@ both MergeView and CleanView.
 
 ## 12. Things deliberately NOT in the project
 
-- No backend, no API. Adding one would break the privacy promise.
+- No **hosted** backend, no API the PWA calls. Adding one would break the
+  privacy promise. (A user-local MCP server distributed via `npx` and
+  driving the same `src/lib/` core is fine — files stay on the user's
+  disk. See section 14.)
 - No analytics, no tracking pixels, no third-party scripts beyond what's
   in the bundle (Leaflet, i18next).
 - No accounts, no login, no persistence beyond `localStorage` for the
@@ -315,3 +371,58 @@ both MergeView and CleanView.
 - Open a PR; never push to main.
 
 Welcome aboard. 🍄
+
+---
+
+## 14. Roadmap: MCP server (Claude Desktop / Code integration)
+
+Long-running initiative tracked in [`docs/roadmap/mcp-server.md`](docs/roadmap/mcp-server.md). Goal: ship
+a `@fitfix/mcp-server` npm package that exposes the same detectors / edits
+as MCP tools, so Claude Desktop and Claude Code users can drive FitFix by
+prompt. Files stay on the user's disk (stdio transport, absolute paths).
+
+Implications for ongoing work in `src/lib/`:
+
+- Treat `src/lib/edits/*`, `src/lib/loops/`, `src/lib/jitter/`,
+  `src/lib/spikes/`, `src/lib/merge.ts`, `src/lib/rewrite.ts`,
+  `src/lib/cleanJitter.ts`, `src/lib/findClusters.ts`, `src/lib/fitStats.ts`,
+  `src/lib/fitToGpx.ts`, and the TCX importer/exporter as **dual-target**:
+  must run in browser AND in Node. No `window`, `document`, `FileReader`,
+  `URL.createObjectURL`, `localStorage` inside these modules — push such
+  calls into a thin adapter consumed by the PWA only.
+- `src/lib/persist.ts` and `src/state/ActivityStore.tsx` are PWA-only
+  (use `localStorage` / React); the MCP server will get its own in-memory
+  session store.
+- When you add a new detector or edit, write the pure function so it could
+  be called from a Node MCP tool handler, not just from a React component.
+
+Future extraction will move dual-target modules into `packages/core/`. Until
+that lands, just keep the discipline above so nothing browser-only sneaks
+into pure logic.
+
+---
+
+## 15. Background reading
+
+Project knowledge that didn't fit here lives in [`docs/`](docs/README.md).
+That folder's `README.md` is **both** the index AND the style guide for
+adding new docs — read it before writing anything in `docs/`.
+
+Quick orientation:
+
+- **`docs/product/`** — competitor research, public-facing comparison.
+- **`docs/engineering/`** — lessons and post-mortems. The April 2026 perf
+  investigation lives here (TL;DR — it was dev-mode React + DevTools
+  serializing a 16k-element prop, not the algorithm).
+- **`docs/roadmap/`** — design sketches for not-yet-started work
+  (MCP server, Garmin Connect integration).
+
+If you start chasing a perf problem in the merge or editor flow, read
+[`docs/engineering/perf-merge-2026-04.md`](docs/engineering/perf-merge-2026-04.md)
+first — it'll save you a few hours.
+
+When you add a doc, follow the conventions in
+[`docs/README.md`](docs/README.md#how-to-write-a-doc): standard 3-line
+header (Status / Audience / TL;DR), kebab-case filename, the right
+folder, and update the index. Don't dump handoff notes or in-flight test
+plans there — those go in a PR description or issue.

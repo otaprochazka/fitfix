@@ -23,7 +23,7 @@ function formatDur(s: number): string {
   return h ? `${h}h ${m}m` : `${m}m ${sec}s`
 }
 
-export default function CleanView({ file, onBack }: Props) {
+export default function CleanView({ file, onBack: _onBack }: Props) {
   const { t } = useTranslation()
   const [bytes, setBytes] = useState<Uint8Array | null>(null)
   const [records, setRecords] = useState<RecordPoint[]>([])
@@ -108,8 +108,7 @@ export default function CleanView({ file, onBack }: Props) {
 
   return (
     <section>
-      <div className="flex items-center gap-2 sticky top-[60px] z-20 -mx-4 px-4 py-2 mb-4 bg-slate-950/95 backdrop-blur lg:static lg:mx-0 lg:px-0 lg:py-0 lg:bg-transparent lg:backdrop-blur-none">
-        <button className="btn-ghost" onClick={onBack}>← {t('clean.back')}</button>
+      <div className="flex items-center gap-2 mb-4">
         <h2 className="text-xl lg:text-2xl">{t('clean.title')}</h2>
       </div>
 

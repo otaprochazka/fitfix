@@ -22,7 +22,9 @@ function formatDuration(s: number): string {
   return h ? `${h}h ${m}m` : `${m}m ${sec}s`
 }
 
-export default function MergeView({ files, onBack }: Props) {
+const SOURCE_COLORS = ['#22d3ee', '#a78bfa', '#fb923c', '#f43f5e', '#84cc16', '#facc15', '#60a5fa', '#f472b6']
+
+export default function MergeView({ files, onBack: _onBack }: Props) {
   const { t } = useTranslation()
   const [loaded, setLoaded] = useState<LoadedFile[] | null>(null)
   const [order, setOrder] = useState<LoadedFile[]>([])
@@ -32,6 +34,7 @@ export default function MergeView({ files, onBack }: Props) {
   const [freshenId, setFreshenId] = useState(true)
   const [dragIdx, setDragIdx] = useState<number | null>(null)
   const [dropIdx, setDropIdx] = useState<number | null>(null)
+  const [fileDropActive, setFileDropActive] = useState(false)
 
   // Read all files once on mount, sort chronologically by default
   useEffect(() => {
@@ -106,11 +109,61 @@ export default function MergeView({ files, onBack }: Props) {
     return order.some((it, i) => it !== sorted[i])
   }, [loaded, order])
 
+  const acceptDroppedFiles = async (fileList: FileList | File[]) => {
+    const arr = Array.from(fileList).filter(f => /\.(fit|tcx)$/i.test(f.name))
+    if (!arr.length) return
+    try {
+      const buffers = await Promise.all(arr.map(f => f.arrayBuffer()))
+      const items: LoadedFile[] = arr.map((file, i) => ({
+        file, bytes: new Uint8Array(buffers[i]),
+      }))
+      setLoaded(prev => [...(prev ?? []), ...items])
+      setOrder(prev => sortByStartTime([...prev, ...items], x => x.bytes))
+    } catch (e) {
+      setErr((e as Error).message)
+    }
+  }
+
+  const sourceTracks = useMemo(
+    () => order.map((it, i) => ({
+      bytes: it.bytes,
+      color: SOURCE_COLORS[i % SOURCE_COLORS.length],
+      label: it.file.name,
+    })),
+    [order],
+  )
+
   return (
-    <section>
+    <section
+      onDragEnter={(e) => {
+        if (Array.from(e.dataTransfer.types).includes('Files')) {
+          e.preventDefault()
+          setFileDropActive(true)
+        }
+      }}
+      onDragOver={(e) => {
+        if (Array.from(e.dataTransfer.types).includes('Files')) {
+          e.preventDefault()
+          setFileDropActive(true)
+        }
+      }}
+      onDragLeave={(e) => {
+        if (e.currentTarget === e.target) setFileDropActive(false)
+      }}
+      onDrop={(e) => {
+        if (e.dataTransfer.files?.length) {
+          e.preventDefault()
+          setFileDropActive(false)
+          void acceptDroppedFiles(e.dataTransfer.files)
+        }
+      }}
+      className={fileDropActive ? 'ring-2 ring-brand-400 ring-offset-2 ring-offset-slate-950 rounded-xl' : ''}
+    >
       <div className="flex items-center mb-4 gap-2">
-        <button className="btn-ghost" onClick={onBack}>← {t('merge.back')}</button>
-        <h2 className="text-2xl">{t('merge.title', { n: files.length })}</h2>
+        <h2 className="text-2xl">{t('merge.title', { n: order.length || files.length })}</h2>
+        {fileDropActive && (
+          <span className="ml-auto text-xs text-brand-300">{t('merge.drop_more')}</span>
+        )}
       </div>
 
       {/* Files being merged — drag to reorder */}
@@ -198,7 +251,19 @@ export default function MergeView({ files, onBack }: Props) {
             <h3 className="text-sm text-slate-400 uppercase tracking-wide mb-2">
               {t('merge.summary.track')}
             </h3>
-            <TrackPreview data={result.output} heightClass="h-72 sm:h-96" />
+            <TrackPreview data={result.output} extraTracks={sourceTracks} heightClass="h-72 sm:h-96" />
+            <div className="flex flex-wrap gap-3 mt-2 text-xs">
+              {sourceTracks.map((tr) => (
+                <span key={tr.label} className="inline-flex items-center gap-1.5 text-slate-400">
+                  <span
+                    className="inline-block w-3 h-3 rounded-sm"
+                    style={{ backgroundColor: tr.color }}
+                    aria-hidden
+                  />
+                  <span className="font-mono truncate max-w-[200px]">{tr.label}</span>
+                </span>
+              ))}
+            </div>
           </div>
 
           <label className="flex items-start gap-2 mb-4 cursor-pointer">
