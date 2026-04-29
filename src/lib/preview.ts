@@ -22,6 +22,9 @@ export interface ActivityPreview {
    * carved-off half would contain. */
   secondary?: { activity: NormalizedActivity; label?: string; color?: string }
   mapTrack?: { bytes: Uint8Array; color: string; label?: string }
+  /** Optional vertical marker on the values-over-time chart — used by
+   * Split to show the cut point so the user can read it against streams. */
+  marker?: { ts: Date; color?: string; label?: string }
   /** Free-form label e.g. "Merge with rest_of_ride.fit". */
   label?: string
 }

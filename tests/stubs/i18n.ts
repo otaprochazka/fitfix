@@ -17,4 +17,7 @@ export default {
   off: () => {},
   changeLanguage: async () => {},
   language: 'en',
+  // Plugin register modules push detector/tool i18n bundles at import time;
+  // make this a no-op so importing them in tests doesn't crash.
+  addResourceBundle: () => {},
 }

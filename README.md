@@ -13,11 +13,11 @@ local — your files never touch a server.
 
 Watches and bike computers split long activities into two `.fit` files
 (battery save, firmware quirks, mid-activity reboot). When you stop for a
-break, GPS keeps recording and your position drifts in spaghetti loops.
-Barometric elevation drifts indoors. Power, HR and speed spikes poison
-your training metrics. Activities flagged "in a vehicle" by Strava when
-they were just indoor on Zwift. Wrong timezone. Forgot to start. Forgot
-to stop and drove home with the watch on.
+break, GPS keeps recording and your position drifts in spaghetti loops —
+or it bounces between canyon walls and draws phantom kilometres while
+you're moving. Barometric elevation drifts indoors. Activities flagged
+"in a vehicle" by Strava when they were just indoor on Zwift. Forgot to
+start. Forgot to stop and drove home with the watch on.
 
 **FitFix** is one unified editor for all of that. Drop a file, get
 suggested fixes, apply the ones you want, export.

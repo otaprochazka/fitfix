@@ -11,6 +11,7 @@ import type { ManualActionPanelProps } from '../../plugins/types'
 import { applyTimeshift } from './applyTimeshift'
 import { parseActivity } from '../../activity'
 import { usePreview } from '../../usePreview'
+import HelpButton from '../../../components/HelpButton'
 
 export function TimeshiftPanel({ activity, onApply }: ManualActionPanelProps) {
   const { t } = useTranslation()
@@ -74,22 +75,21 @@ export function TimeshiftPanel({ activity, onApply }: ManualActionPanelProps) {
 
   return (
     <div className="space-y-4">
-      {/* What this tool does */}
-      <div className="rounded-md border border-slate-700/60 bg-slate-800/40 px-3 py-2 text-xs text-slate-300 leading-relaxed">
-        <p className="font-medium text-slate-100 mb-1">
-          {t('editor.timeshift.explain_title', 'What "Time shift" does')}
-        </p>
-        <p>
-          {t(
+      <div className="flex items-start gap-2">
+        {yearAnomaly && currentStart ? (
+          <p className="text-xs text-amber-300 flex-1">
+            {t('editor.timeshift.year_anomaly', '⚠ This file starts in {{year}} — likely a sync glitch. Try the offset that lands it on the actual day.', { year: currentStart.getFullYear() })}
+          </p>
+        ) : (
+          <div className="flex-1" />
+        )}
+        <HelpButton
+          title={t('editor.timeshift.explain_title', 'What "Time shift" does')}
+          body={t(
             'editor.timeshift.explain_body',
             'Adds a fixed offset to every timestamp in the file: record times, lap markers, session start, file ID. GPS, HR, distance and any sensor data are unchanged. Common reasons: watch was on the wrong timezone, GPS sync glitch landed the activity in 1972, or you crossed time zones mid-trip.',
           )}
-        </p>
-        {yearAnomaly && currentStart && (
-          <p className="mt-1 text-amber-300">
-            {t('editor.timeshift.year_anomaly', '⚠ This file starts in {{year}} — likely a sync glitch. Try the offset that lands it on the actual day.', { year: currentStart.getFullYear() })}
-          </p>
-        )}
+        />
       </div>
 
       {/* Current bounds */}

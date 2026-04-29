@@ -263,13 +263,20 @@ export default function TrackPreview({
   }
 
   return (
-    <div className={`relative w-full ${heightClass} rounded-xl overflow-hidden border border-slate-800`}>
-      <div
-        ref={elRef}
-        className={`w-full h-full ${active ? '' : 'scroll-passthrough'}`}
-        onClick={activate}
-        onMouseLeave={deactivate}
-      />
+    // Move the click/mouseleave handlers and the activate/deactivate
+    // `scroll-passthrough` toggle to THIS wrapper. The inner `<div ref={elRef}>`
+    // is the same element Leaflet was initialized on — React must not touch its
+    // className, otherwise the next re-render diffs against the JSX-only
+    // string and clobbers Leaflet's own `leaflet-container …` classes,
+    // hiding all tiles. (Symptom: tiles vanish when the user clicks to
+    // interact.) The CSS rule `.scroll-passthrough .leaflet-container { … }`
+    // still scopes correctly because the leaflet container is a descendant.
+    <div
+      className={`relative w-full ${heightClass} rounded-xl overflow-hidden border border-slate-800 ${active ? '' : 'scroll-passthrough'}`}
+      onClick={activate}
+      onMouseLeave={deactivate}
+    >
+      <div ref={elRef} className="w-full h-full" />
       {!active && (
         <div className="map-shade" aria-hidden>
           <span className="map-shade-pill">{t('map.click_to_interact')}</span>

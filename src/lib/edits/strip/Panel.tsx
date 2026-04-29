@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next'
 import type { ManualActionPanelProps } from '../../plugins/types'
 import { walkMessages, writeField, recomputeFileCrc } from '../../fit'
 import { parseActivity } from '../../activity'
+import HelpButton from '../../../components/HelpButton'
 import { usePreview } from '../../usePreview'
 
 // FIT-invalid sentinel values per type (per FIT SDK spec)
@@ -154,19 +155,16 @@ export function StripPanel({ activity, onApply }: ManualActionPanelProps) {
 
   return (
     <div className="space-y-3">
-      {/* What this tool does */}
-      <div className="rounded-md border border-slate-700/60 bg-slate-800/40 px-3 py-2 text-xs text-slate-300 leading-relaxed">
-        <p className="font-medium text-slate-100 mb-1">
-          {t('editor.strip.explain_title', 'What "Strip streams" does')}
-        </p>
-        <p>
-          {t(
+      <div className="flex items-center gap-2">
+        <p className="text-sm text-slate-400 flex-1">{t('editor.strip.panel_body')}</p>
+        <HelpButton
+          title={t('editor.strip.explain_title', 'What "Strip streams" does')}
+          body={t(
             'editor.strip.explain_body',
             'Replaces every value in the chosen streams with FIT-invalid sentinel values, in every record. The records and timestamps stay; the field is just blanked. Use it to drop junk HR from a chest-strap dropout, or to remove GPS before publishing a sensitive route. Cannot be undone after export — keep a copy of the original.',
           )}
-        </p>
+        />
       </div>
-      <p className="text-sm text-slate-400">{t('editor.strip.panel_body')}</p>
       <div className="space-y-2">
         {STREAMS.map((s) => {
           const cov = coverageOf(s.key)

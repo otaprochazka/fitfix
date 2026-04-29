@@ -13,6 +13,7 @@ import { applyRollingMedian, applyForceNetZero } from './detector'
 import { parseActivity } from '../../activity'
 import { haversine } from '../../fit'
 import { usePreview } from '../../usePreview'
+import HelpButton from '../../../components/HelpButton'
 
 type Mode = 'recompute' | 'smooth' | 'force-net-zero'
 
@@ -139,17 +140,14 @@ export default function ElevationPanel({ activity, onApply }: ManualActionPanelP
 
   return (
     <div className="space-y-4">
-      {/* What this tool does */}
-      <div className="rounded-md border border-slate-700/60 bg-slate-800/40 px-3 py-2 text-xs text-slate-300 leading-relaxed space-y-1">
-        <p className="font-medium text-slate-100">
-          {t('editor.elevation.explain_title', 'What "Fix elevation" does')}
-        </p>
-        <p>
-          {t(
+      <div className="flex justify-end">
+        <HelpButton
+          title={t('editor.elevation.explain_title', 'What "Fix elevation" does')}
+          body={t(
             'editor.elevation.explain_body',
             'Barometric altimeters drift over a long activity (weather changes, indoor pressure shifts). The result: ascent ≠ descent on a loop, or +50 m of phantom climb while you sat at a café. This tool rewrites the altitude stream and patches the session/lap totals.',
           )}
-        </p>
+        />
       </div>
 
       {/* What's wrong with this file right now */}

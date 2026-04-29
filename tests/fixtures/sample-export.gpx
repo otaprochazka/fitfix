@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="FitFix test fixture"
+     xmlns="http://www.topografix.com/GPX/1/1"
+     xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v2">
+  <metadata>
+    <name>Synthetic FitFix GPX fixture</name>
+    <time>2024-06-01T08:00:00Z</time>
+  </metadata>
+  <trk>
+    <name>Test ride</name>
+    <trkseg>
+      <trkpt lat="50.0800000" lon="14.4300000">
+        <ele>200.0</ele>
+        <time>2024-06-01T08:00:00Z</time>
+        <extensions>
+          <gpxtpx:TrackPointExtension>
+            <gpxtpx:hr>120</gpxtpx:hr>
+            <gpxtpx:cad>78</gpxtpx:cad>
+            <gpxtpx:atemp>21</gpxtpx:atemp>
+          </gpxtpx:TrackPointExtension>
+          <power>180</power>
+        </extensions>
+      </trkpt>
+      <trkpt lat="50.0801000" lon="14.4301000">
+        <ele>200.5</ele>
+        <time>2024-06-01T08:00:01Z</time>
+        <extensions>
+          <gpxtpx:TrackPointExtension>
+            <gpxtpx:hr>122</gpxtpx:hr>
+            <gpxtpx:cad>79</gpxtpx:cad>
+            <gpxtpx:atemp>21</gpxtpx:atemp>
+          </gpxtpx:TrackPointExtension>
+          <power>185</power>
+        </extensions>
+      </trkpt>
+      <trkpt lat="50.0802000" lon="14.4302000">
+        <ele>201.2</ele>
+        <time>2024-06-01T08:00:02Z</time>
+        <extensions>
+          <gpxtpx:TrackPointExtension>
+            <gpxtpx:hr>125</gpxtpx:hr>
+            <gpxtpx:cad>80</gpxtpx:cad>
+            <gpxtpx:atemp>22</gpxtpx:atemp>
+          </gpxtpx:TrackPointExtension>
+          <power>190</power>
+        </extensions>
+      </trkpt>
+      <trkpt lat="50.0803000" lon="14.4303000">
+        <ele>201.0</ele>
+        <time>2024-06-01T08:00:03Z</time>
+        <extensions>
+          <gpxtpx:TrackPointExtension>
+            <gpxtpx:hr>127</gpxtpx:hr>
+            <gpxtpx:cad>81</gpxtpx:cad>
+            <gpxtpx:atemp>22</gpxtpx:atemp>
+          </gpxtpx:TrackPointExtension>
+          <power>192</power>
+        </extensions>
+      </trkpt>
+    </trkseg>
+  </trk>
+</gpx>

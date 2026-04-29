@@ -27,8 +27,8 @@
   },
   "home": {
     "headline": "Fix, merge & convert any FIT activity — in your browser.",
-    "subhead": "Drop a .fit or .tcx file from your watch or bike computer. The advisor finds what's wrong and offers a one-click fix. Your file never leaves your device.",
-    "drop": "Drop one or more .fit or .tcx files here",
+    "subhead": "Drop a .fit, .tcx or .gpx file from your watch or bike computer. The advisor finds what's wrong and offers a one-click fix. Your file never leaves your device.",
+    "drop": "Drop one or more .fit, .tcx or .gpx files here",
     "or": "or",
     "browse": "Browse files",
     "merge_cta": "Merge files",
@@ -98,6 +98,11 @@
       "desc": "All-in-one: see your activity, get suggested fixes, apply, export. Replaces the three tools below as features land."
     },
     "editor_cta": "Open in Editor",
+    "feature_picker": {
+      "title": "Try this feature",
+      "body": "Pick a sample activity to open this tool. Your file never leaves your device.",
+      "close": "Close"
+    },
     "capabilities": {
       "heading": "What FitFix can fix",
       "sub": "Drop one file. The advisor surfaces what's worth fixing — you stay in control.",
@@ -259,7 +264,7 @@
     "title": "How it works",
     "step1": {
       "title": "Drop",
-      "body": "Drop a .fit or .tcx from any device. Files load in your browser; nothing is uploaded.",
+      "body": "Drop a .fit, .tcx or .gpx from any device. Files load in your browser; nothing is uploaded.",
       "short": "Loads in your browser. Nothing is uploaded."
     },
     "step2": {
@@ -319,6 +324,14 @@
     "options": {
       "fresh_id": "Make file uploadable to Garmin Connect (new file ID)",
       "fresh_id_help": "Garmin Connect refuses files with an ID it has already seen. Bumping the ID lets you upload the merged result even if you previously uploaded the originals."
+    },
+    "validation": {
+      "title": "Can't merge these files",
+      "intro": "Merge expects consecutive activities. Fix or remove the flagged files to continue.",
+      "invalid": "not a valid FIT file ({{reason}})",
+      "no_records": "no GPS records or timestamps found",
+      "overlap": "{{a}} and {{b}} overlap in time by {{seconds}} s — they look like the same activity, not consecutive segments.",
+      "hint": "Tip: drop the duplicate, or keep only the segment you want and re-upload."
     },
     "download": "Download merged.fit",
     "also_gpx": "Also as .gpx",

@@ -13,7 +13,7 @@ import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 
 import { walkMessages } from '../../src/lib/fit'
-import { mergeFitMany } from '../../src/lib/merge'
+import { mergeFitMany, validateMergeFiles } from '../../src/lib/merge'
 import { splitAt } from '../../src/lib/rewrite'
 import { parseActivity } from '../../src/lib/activity'
 
@@ -90,6 +90,42 @@ describe('merge — LRU growth-ratio guard', () => {
     const expected = original.meta.totalDistanceM!
     expect(result.totalDistanceM).toBeGreaterThan(expected * 0.9)
     expect(result.totalDistanceM).toBeLessThan(expected * 1.1)
+  })
+
+  it('validateMergeFiles flags duplicate uploads as overlapping', () => {
+    const issues = validateMergeFiles([
+      { name: 'a.fit', bytes },
+      { name: 'b.fit', bytes },
+    ])
+    const overlap = issues.find(i => i.kind === 'overlap')
+    expect(overlap).toBeDefined()
+    if (overlap?.kind === 'overlap') {
+      expect(overlap.aName).toBe('a.fit')
+      expect(overlap.bName).toBe('b.fit')
+      expect(overlap.overlapSeconds).toBeGreaterThan(0)
+    }
+  })
+
+  it('validateMergeFiles allows two consecutive halves of one activity', () => {
+    const original = parseActivity(bytes, 'edge-500.fit')
+    const midTs = new Date(
+      (original.meta.startTs!.getTime() + original.meta.endTs!.getTime()) / 2,
+    )
+    const [a, b] = splitAt(bytes, midTs)
+    const issues = validateMergeFiles([
+      { name: 'a.fit', bytes: a },
+      { name: 'b.fit', bytes: b },
+    ])
+    expect(issues).toEqual([])
+  })
+
+  it('validateMergeFiles rejects non-FIT bytes', () => {
+    const garbage = new TextEncoder().encode('this is not a fit file at all')
+    const issues = validateMergeFiles([
+      { name: 'broken.fit', bytes: garbage },
+      { name: 'good.fit', bytes },
+    ])
+    expect(issues.some(i => i.kind === 'invalid' && i.fileName === 'broken.fit')).toBe(true)
   })
 
   it('merging the same file twice stays within the budget', () => {

@@ -26,13 +26,13 @@ export default defineConfig({
         },
       },
       {
-        // tests/dom/ is currently empty — every src/lib/ module is
-        // Node-runnable post-xmldom swap. Reserved for future React
-        // component / hook tests.
+        // tests/dom/ — React component / hook tests that need a DOM. Uses
+        // jsdom and stubs react-i18next so we don't drag in the real loader.
         test: {
           name: 'dom',
           include: ['tests/dom/**/*.test.ts', 'tests/dom/**/*.test.tsx'],
           environment: 'jsdom',
+          setupFiles: ['tests/setup/dom-setup.ts'],
         },
       },
     ],

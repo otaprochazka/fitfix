@@ -27,8 +27,8 @@
   },
   "home": {
     "headline": "Oprav, sluč & převeď libovolný FIT — přímo v prohlížeči.",
-    "subhead": "Hoď sem .fit nebo .tcx z hodinek nebo cyklopočítače. Advisor najde co je špatně a nabídne opravu na jeden klik. Soubor neopustí tvoje zařízení.",
-    "drop": "Sem přetáhni jeden nebo víc .fit nebo .tcx souborů",
+    "subhead": "Hoď sem .fit, .tcx nebo .gpx z hodinek nebo cyklopočítače. Advisor najde co je špatně a nabídne opravu na jeden klik. Soubor neopustí tvoje zařízení.",
+    "drop": "Sem přetáhni jeden nebo víc .fit, .tcx nebo .gpx souborů",
     "or": "nebo",
     "browse": "Vyber soubory",
     "merge_cta": "Sloučit",
@@ -98,6 +98,11 @@
       "desc": "Vše v jednom: aktivita, návrhy oprav, aplikace, export. Postupně nahradí tři nástroje níže."
     },
     "editor_cta": "Otevřít v Editoru",
+    "feature_picker": {
+      "title": "Vyzkoušej tuhle funkci",
+      "body": "Vyber ukázkovou aktivitu a otevři tenhle nástroj. Soubor nikdy neopustí tvoje zařízení.",
+      "close": "Zavřít"
+    },
     "capabilities": {
       "heading": "Co FitFix umí opravit",
       "sub": "Hoď sem soubor. Advisor ukáže co stojí za opravu — co aplikuješ, je na tobě.",
@@ -261,7 +266,7 @@
     "title": "Jak to funguje",
     "step1": {
       "title": "Hoď sem soubor",
-      "body": "Hoď sem .fit nebo .tcx z libovolného zařízení. Soubor se načte v prohlížeči; nikam se neuploaduje.",
+      "body": "Hoď sem .fit, .tcx nebo .gpx z libovolného zařízení. Soubor se načte v prohlížeči; nikam se neuploaduje.",
       "short": "Načte se v prohlížeči, nikam se neuploaduje."
     },
     "step2": {
@@ -321,6 +326,14 @@
     "options": {
       "fresh_id": "Připravit pro nahrání do Garmin Connect (nové file ID)",
       "fresh_id_help": "Garmin Connect odmítá soubory s ID, které už zná. Změnou ID půjde sloučený výsledek nahrát i když jsi předtím nahrál originály."
+    },
+    "validation": {
+      "title": "Tyhle soubory sloučit nejde",
+      "intro": "Slučování očekává navazující aktivity. Oprav nebo odeber označené soubory.",
+      "invalid": "není platný FIT soubor ({{reason}})",
+      "no_records": "neobsahuje GPS body ani časové značky",
+      "overlap": "{{a}} a {{b}} se časově překrývají o {{seconds}} s — vypadají jako stejná aktivita, ne navazující úseky.",
+      "hint": "Tip: smaž duplicitu, nebo nech jen úsek, který chceš, a nahraj znovu."
     },
     "download": "Stáhnout merged.fit",
     "also_gpx": "Také jako .gpx",

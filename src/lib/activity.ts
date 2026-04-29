@@ -188,25 +188,18 @@ export function parseActivity(bytes: Uint8Array, filename: string): NormalizedAc
   const lower = filename.toLowerCase()
   if (lower.endsWith('.fit')) return parseFitActivity(bytes, filename)
   if (lower.endsWith('.tcx')) {
-    // Lazy require avoids a top-level cycle and keeps activity.ts tidy.
-    // The TCX parser produces the same NormalizedActivity shape.
-    const { parseTcxActivity } = requireTcxParser()
-    return parseTcxActivity(bytes, filename)
+    return tcxParserModule.parseTcxActivity(bytes, filename)
+  }
+  if (lower.endsWith('.gpx')) {
+    return gpxParserModule.parseGpxActivity(bytes, filename)
   }
   // Magic-byte sniff for headerless FIT uploads.
   if (bytes.length >= 12 &&
       bytes[8] === 0x2E && bytes[9] === 0x46 && bytes[10] === 0x49 && bytes[11] === 0x54) {
     return parseFitActivity(bytes, filename)
   }
-  throw new Error(`Unsupported file format: ${filename}. FitFix supports .fit and .tcx; .gpx import is on the roadmap.`)
-}
-
-// Importing the TCX parser eagerly is fine — it has no top-level side
-// effects beyond a one-time module load — but wrapping it in a small
-// indirection lets us swap the implementation in tests without touching
-// the dispatcher.
-function requireTcxParser() {
-  return tcxParserModule
+  throw new Error(`Unsupported file format: ${filename}. FitFix supports .fit, .tcx and .gpx.`)
 }
 
 import * as tcxParserModule from './edits/tcx-import/register'
+import * as gpxParserModule from './edits/gpx-import/register'

@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
 interface Props {
@@ -7,16 +8,21 @@ interface Props {
   sectionLabel?: string
   /** Optional secondary crumb, e.g. the file name. */
   detailLabel?: string
+  /** Optional tooltip override for the detail crumb (defaults to detailLabel). */
+  detailTitle?: string
   /** Optional third crumb (the active editor tool). */
   toolLabel?: string
   /** When true, the detail crumb becomes clickable and acts as "exit tool". */
   detailIsClickable?: boolean
   /** Handler invoked when the user clicks the detail crumb to exit the tool. */
   onClearTool?: () => void
+  /** Right-aligned slot — used by the editor for compact undo/redo controls so they
+   *  share the breadcrumb row instead of taking a dedicated row in the page body. */
+  rightSlot?: ReactNode
 }
 
 export default function TrustBar({
-  onBack, sectionLabel, detailLabel, toolLabel, detailIsClickable, onClearTool,
+  onBack, sectionLabel, detailLabel, detailTitle, toolLabel, detailIsClickable, onClearTool, rightSlot,
 }: Props) {
   const { t } = useTranslation()
 
@@ -45,12 +51,12 @@ export default function TrustBar({
                 <button
                   onClick={onClearTool}
                   className="text-slate-300 hover:text-brand-300 font-medium truncate min-w-0"
-                  title={detailLabel}
+                  title={detailTitle ?? detailLabel}
                 >
                   {detailLabel}
                 </button>
               ) : (
-                <span className="text-slate-100 font-medium truncate" title={detailLabel}>
+                <span className="text-slate-100 font-medium truncate" title={detailTitle ?? detailLabel}>
                   {detailLabel}
                 </span>
               )}
@@ -64,18 +70,22 @@ export default function TrustBar({
               </span>
             </>
           )}
+          {rightSlot && <div className="ml-auto shrink-0 flex items-center">{rightSlot}</div>}
         </div>
       </div>
     )
   }
 
+  // Mobile: rely on gap for spacing (inline `·` separators left orphaned dots
+  // mid-line when the bar wrapped). `sm:` and up still get the dot separators
+  // because the bar fits on one line and the dots help readability.
   return (
     <div className="border-b border-slate-800/40 bg-slate-950">
-      <div className="max-w-6xl mx-auto px-4 py-2 flex items-center justify-center gap-x-5 gap-y-1 flex-wrap text-xs sm:text-sm text-slate-400">
+      <div className="max-w-6xl mx-auto px-4 py-2 flex items-center justify-center gap-x-3 sm:gap-x-5 gap-y-1 flex-wrap text-xs sm:text-sm text-slate-400">
         <span className="inline-flex items-center gap-1">
           <span aria-hidden>🔒</span> {t('trust.local')}
         </span>
-        <span className="text-slate-700" aria-hidden>·</span>
+        <span className="text-slate-700 hidden sm:inline" aria-hidden>·</span>
         <a
           href="https://github.com/otaprochazka/fitfix"
           target="_blank" rel="noreferrer"
@@ -90,7 +100,7 @@ export default function TrustBar({
           </svg>
           {t('trust.open')}
         </a>
-        <span className="text-slate-700" aria-hidden>·</span>
+        <span className="text-slate-700 hidden sm:inline" aria-hidden>·</span>
         <span className="inline-flex items-center gap-1">
           <span aria-hidden>🚫</span> {t('trust.no_ads')}
         </span>

@@ -14,6 +14,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { ManualActionPanelProps } from '../../plugins/types'
+import HelpButton from '../../../components/HelpButton'
 import type { ActivityPoint } from '../../activity'
 
 // ---- Lane definitions -------------------------------------------------------
@@ -335,20 +336,16 @@ export default function TrackPanel({ activity }: ManualActionPanelProps) {
 
   return (
     <div className="space-y-3">
-      {/* What this tool does */}
-      <div className="rounded-md border border-slate-700/60 bg-slate-800/40 px-3 py-2 text-xs text-slate-300 leading-relaxed">
-        <p className="font-medium text-slate-100 mb-1">
-          {t('editor.track.explain_title', 'What "Data track" shows')}
-        </p>
-        <p>
-          {t(
+      <div className="flex items-center gap-2">
+        <p className="text-sm text-slate-400 flex-1">{t('editor.track.panel_subtitle')}</p>
+        <HelpButton
+          title={t('editor.track.explain_title', 'What "Data track" shows')}
+          body={t(
             'editor.track.explain_body',
             'Stacked waveforms for every recorded stream — speed, altitude, HR, cadence, power, temperature. Read-only: nothing changes on Apply (there is no Apply). Hover or scrub to inspect exact values; drag the bottom slider to zoom into a window. Useful for spotting where a fix should be aimed before opening Spikes / Elevation / Trim.',
           )}
-        </p>
+        />
       </div>
-      {/* Header */}
-      <p className="text-sm text-slate-400">{t('editor.track.panel_subtitle')}</p>
 
       {/* Zoom control */}
       <div className="bg-slate-800/40 rounded-lg p-3 space-y-2">

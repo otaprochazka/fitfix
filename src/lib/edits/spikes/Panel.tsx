@@ -14,6 +14,7 @@ import { detectSpikesDetailed, type SpikeSample, type SpikeStream } from './dete
 import { applySpikeFix } from './action'
 import { parseActivity } from '../../activity'
 import { usePreview } from '../../usePreview'
+import HelpButton from '../../../components/HelpButton'
 
 function fmtClock(ts: Date): string {
   return ts.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' })
@@ -106,17 +107,14 @@ export function SpikesPanel({ activity, onApply }: ManualActionPanelProps) {
 
   return (
     <div className="space-y-4 text-sm">
-      {/* What this tool does */}
-      <div className="rounded-md border border-slate-700/60 bg-slate-800/40 px-3 py-2 text-xs text-slate-300 leading-relaxed">
-        <p className="font-medium text-slate-100 mb-1">
-          {t('editor.spikes.explain_title', 'What "Fix spikes" does')}
-        </p>
-        <p>
-          {t(
+      <div className="flex justify-end">
+        <HelpButton
+          title={t('editor.spikes.explain_title', 'What "Fix spikes" does')}
+          body={t(
             'editor.spikes.explain_body',
             'Scans HR, power and speed for samples that jump far above their neighbours (e.g. HR 240 BPM for one second between values around 150). Each outlier is replaced with the median of the surrounding window — your ride/run averages stop being skewed by sensor glitches.',
           )}
-        </p>
+        />
       </div>
 
       {/* Stream toggles + detected counts */}

@@ -14,7 +14,7 @@ export default function DropZone({ onFiles }: Props) {
     if (!list) return
     const files = Array.from(list).filter(f => {
       const n = f.name.toLowerCase()
-      return n.endsWith('.fit') || n.endsWith('.tcx')
+      return n.endsWith('.fit') || n.endsWith('.tcx') || n.endsWith('.gpx')
     })
     if (files.length) onFiles(files)
   }, [onFiles])
@@ -40,7 +40,7 @@ export default function DropZone({ onFiles }: Props) {
           ref={inputRef}
           data-testid="dropzone-input"
           type="file"
-          accept=".fit,.tcx"
+          accept=".fit,.tcx,.gpx"
           multiple
           hidden
           onChange={e => accept(e.target.files)}

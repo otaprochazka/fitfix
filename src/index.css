@@ -55,7 +55,7 @@
 
 /* Touch-device scroll trap fix: when the map is not "interactive",
    let one-finger drags pass through to page scroll. */
-.leaflet-container.scroll-passthrough { touch-action: pan-y !important; }
+.scroll-passthrough .leaflet-container { touch-action: pan-y !important; }
 .scroll-passthrough .leaflet-grab,
 .scroll-passthrough .leaflet-marker-draggable { cursor: pointer; }
 

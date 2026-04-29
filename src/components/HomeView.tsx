@@ -54,13 +54,22 @@ export default function HomeView({ onSelect }: Props) {
   const [pending, setPending] = useState<File[]>([])
   const [loaded, setLoaded] = useState<LoadedFile[]>([])
   const [error, setError] = useState<string | null>(null)
+  // When a capability card is clicked but no history exists, we pop a
+  // sample-picker dialog. The toolId stashed here is forwarded into the
+  // editor once the user picks a sample. `null` is a valid toolId value
+  // (overview-only cards), so we use a sentinel object to mean "closed".
+  const [pickerToolId, setPickerToolId] = useState<{ id: string | null } | null>(null)
+  const [pickerLoading, setPickerLoading] = useState<SampleId | null>(null)
+  const [pickerError, setPickerError] = useState<string | null>(null)
 
   // Load any newly added pending files and auto-route based on count:
   //   1 file  → editor (skip the explicit "Open in Editor" click)
   //   2+ files (all .fit) → editor opened on the chronologically earliest
   //                          file, with the rest pre-staged into the in-editor
-  //                          "Merge with another .fit file" tool.
-  //   2+ files (mixed)    → fall back to the file list + manual CTA.
+  //                          "Merge with another .fit file" tool. The auto-merge
+  //                          path is FIT-only because the merge tool rewrites
+  //                          FIT bytes; .tcx and .gpx fall through to the file
+  //                          list and the user picks one for the editor.
   useEffect(() => {
     if (pending.length === 0) return
     let cancel = false
@@ -136,20 +145,63 @@ export default function HomeView({ onSelect }: Props) {
     onSelect({ kind: 'editor', file: loaded[0].file })
   }
 
+  // Capability card click: route based on history state.
+  //   1+ entries → open the most-recently-modified one in the editor,
+  //               deep-linking to the picked tool.
+  //   0 entries  → pop the sample-picker dialog. Picking a sample loads
+  //               its bytes and opens the editor at the same tool.
+  const pickFeature = (toolId: string | null) => {
+    const entries = listHistory()
+    if (entries.length === 0) {
+      setPickerToolId({ id: toolId })
+      setPickerError(null)
+      return
+    }
+    const latest = [...entries].sort((a, b) => b.modifiedAt - a.modifiedAt)[0]
+    const session = loadSession(latest.id)
+    if (!session) {
+      // Persisted entry but no payload (eviction or quota miss): fall back
+      // to the dialog so the user can still proceed.
+      setPickerToolId({ id: toolId })
+      return
+    }
+    const file = new File([session.current as BlobPart], latest.filename, {
+      type: 'application/octet-stream',
+    })
+    onSelect({ kind: 'editor', file, resumeId: latest.id, openTool: toolId ?? undefined })
+  }
+
+  const pickSampleForFeature = async (sample: SampleId) => {
+    if (!pickerToolId) return
+    setPickerLoading(sample)
+    setPickerError(null)
+    try {
+      const meta = SAMPLES[sample]
+      const resp = await fetch(`/samples/${meta.filename}`)
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`)
+      const blob = await resp.blob()
+      const file = new File([blob], meta.filename, { type: 'application/octet-stream' })
+      onSelect({ kind: 'editor', file, openTool: pickerToolId.id ?? undefined })
+    } catch {
+      setPickerError(t('home.history.sample_error'))
+      setPickerLoading(null)
+    }
+  }
+
   const hasFiles = loaded.length > 0
   const oneFile = loaded.length === 1
   const twoOrMore = loaded.length >= 2
   // Legacy 3-tile flows (merge / clean / gpx) only support FIT bytes. Files
-  // that aren't FIT (TCX, future GPX) route exclusively through the new
-  // unified editor.
+  // that aren't FIT (TCX, GPX) route exclusively through the new unified
+  // editor.
   const allFit = loaded.every(f => f.file.name.toLowerCase().endsWith('.fit'))
   const showLegacy = allFit && hasFiles
 
   return (
     <>
-      <section className="text-center max-w-3xl mx-auto pt-10 pb-6">
-        <h1 className="text-5xl md:text-6xl mb-5 leading-tight">{t('home.headline')}</h1>
-        <p className="text-slate-300 text-lg md:text-xl leading-relaxed">{t('home.subhead')}</p>
+      <section className="text-center max-w-3xl mx-auto pt-6 pb-4 sm:pt-10 sm:pb-6">
+        <h1 className="text-3xl sm:text-5xl md:text-6xl mb-3 sm:mb-5 leading-tight">{t('home.headline')}</h1>
+        <p className="text-slate-300 text-base sm:text-lg md:text-xl leading-relaxed">{t('home.subhead')}</p>
       </section>
 
       <div className="mt-8 grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-4">
@@ -177,7 +229,16 @@ export default function HomeView({ onSelect }: Props) {
         </div>
       )}
 
-      <CapabilitiesGrid />
+      <CapabilitiesGrid onPick={pickFeature} />
+
+      {pickerToolId && (
+        <FeatureSamplePickerDialog
+          loadingSample={pickerLoading}
+          error={pickerError}
+          onPick={pickSampleForFeature}
+          onClose={() => { setPickerToolId(null); setPickerLoading(null); setPickerError(null) }}
+        />
+      )}
 
       {/* Primary unified action — opens the new editor (single file). */}
       {oneFile && (
@@ -492,6 +553,73 @@ function SampleMiniPicker({
         </button>
       ))}
     </span>
+  )
+}
+
+function FeatureSamplePickerDialog({
+  loadingSample, error, onPick, onClose,
+}: {
+  loadingSample: SampleId | null
+  error: string | null
+  onPick: (id: SampleId) => void
+  onClose: () => void
+}) {
+  const { t } = useTranslation()
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      className="fixed inset-0 z-[1200] flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4"
+      onClick={onClose}
+    >
+      <div
+        className="card max-w-md w-full bg-slate-900 border-slate-700"
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="flex items-center mb-3">
+          <h3 className="text-base text-slate-100 font-semibold">
+            {t('home.feature_picker.title')}
+          </h3>
+          <button
+            type="button"
+            onClick={onClose}
+            className="ml-auto text-slate-500 hover:text-red-400"
+            aria-label={t('home.feature_picker.close')}
+          >✕</button>
+        </div>
+        <p className="text-sm text-slate-400 mb-3">
+          {t('home.feature_picker.body')}
+        </p>
+        <ul className="space-y-1.5">
+          {SAMPLE_ORDER.map(id => {
+            const meta = SAMPLES[id]
+            const loading = loadingSample === id
+            const disabled = loadingSample !== null && !loading
+            return (
+              <li key={id}>
+                <button
+                  type="button"
+                  onClick={() => onPick(id)}
+                  disabled={disabled}
+                  className="w-full text-left flex items-baseline gap-2 px-3 py-2 rounded border border-slate-800 hover:border-brand-500/40 hover:bg-brand-500/10 disabled:opacity-40 disabled:cursor-not-allowed group"
+                >
+                  <span className="text-base" aria-hidden>{meta.emoji}</span>
+                  <span className="font-semibold text-sm text-brand-300 group-hover:text-brand-200">
+                    {loading
+                      ? t('home.history.sample_loading')
+                      : t(`home.history.sample.${id}.label`)}
+                  </span>
+                  <span className="text-xs text-slate-500 ml-auto truncate">
+                    {t(`home.history.sample.${id}.meta`)}
+                  </span>
+                </button>
+              </li>
+            )
+          })}
+        </ul>
+        {error && <p className="text-xs text-red-400 mt-3">{error}</p>}
+      </div>
+    </div>
   )
 }
 
